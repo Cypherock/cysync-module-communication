@@ -1,0 +1,45 @@
+{
+  "name": "@cypherock/communication",
+  "version": "3.0.1-beta.12",
+  "description": "Communication library for Cypherock X1 wallet",
+  "main": "dist/app.js",
+  "types": "dist/app.d.ts",
+  "scripts": {
+    "build": "rimraf dist && tsc -p tsconfig.json",
+    "lint": "tslint -p tsconfig.json -c tslint.json --fix",
+    "lint:check": "tslint -p tsconfig.json -c tslint.json",
+    "pretty": "prettier --write 'src/**/*.ts'",
+    "pretty:check": "prettier --check 'src/**/*.ts'",
+    "doc": "typedoc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cypherock",
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "serialport": "10.0.0",
+    "winston": "^3.5.1"
+  },
+  "devDependencies": {
+    "@types/serialport": "^8.0.1",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.4",
+    "prettier": "^2.5.1",
+    "rimraf": "^3.0.2",
+    "tslint": "^6.1.2",
+    "typedoc": "^0.22.11",
+    "typescript": "^4.5.5"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "tslint -p tsconfig.json -c tslint.json --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+}

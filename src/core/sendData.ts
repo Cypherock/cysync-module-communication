@@ -26,6 +26,10 @@ const writePacket = (
   let usableConstants = constants.v1;
   const usableCommands = commands.v1;
 
+  if (!connection.isOpen || connection.destroyed) {
+    throw new DeviceError(DeviceErrorType.CONNECTION_CLOSED);
+  }
+
   if (version === PacketVersionMap.v2) {
     usableConstants = constants.v2;
   }
@@ -135,6 +139,19 @@ const sendData = async (
           resolve(true);
           return;
         } catch (e) {
+          // Don't retry if connection closed
+          if (e instanceof DeviceError) {
+            if (
+              [
+                DeviceErrorType.CONNECTION_CLOSED,
+                DeviceErrorType.CONNECTION_NOT_OPEN,
+                DeviceErrorType.NOT_CONNECTED
+              ].includes(e.errorType)
+            ) {
+              tries = _maxTries;
+            }
+          }
+
           lastError = e as Error;
           logger.warn('Error in sending data', e);
         }

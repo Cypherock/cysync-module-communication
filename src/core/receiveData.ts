@@ -109,7 +109,11 @@ export const receiveCommand = (
               connection.removeListener('close', onClose);
             }
           });
-        } else {
+        } else if (
+          ![usableCommands.ACK_PACKET, usableCommands.NACK_PACKET].includes(
+            commandType
+          )
+        ) {
           if (version !== PacketVersionMap.v1) {
             // Send NACK if invalid command.
             const nackPacket = ackData(
@@ -277,7 +281,11 @@ export const receiveAnyCommand = (
               connection.removeListener('close', onClose);
             }
           });
-        } else {
+        } else if (
+          ![usableCommands.ACK_PACKET, usableCommands.NACK_PACKET].includes(
+            commandType
+          )
+        ) {
           if (version !== PacketVersionMap.v1) {
             // Send NACK if invalid command.
             const nackPacket = ackData(

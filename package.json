@@ -17,10 +17,12 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "serialport": "10.0.0",
+    "uuid": "^8.3.2",
     "winston": "^3.5.1"
   },
   "devDependencies": {
     "@types/serialport": "^8.0.1",
+    "@types/uuid": "^8.3.4",
     "husky": "^7.0.4",
     "lint-staged": "^12.3.4",
     "prettier": "^2.5.1",

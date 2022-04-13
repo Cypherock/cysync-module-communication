@@ -5,25 +5,6 @@ import { DeviceError, DeviceErrorType } from '../errors';
 import { getAvailableConnectionInfo } from './connection';
 
 /**
- * This method closes the port so it can be used again when required.
- *
- * @example
- * ```typescript
- * import {closePort} from '@cypherock/communication'
- *
- * ...
- *
- * closePort(connection);
- * ```
- *
- * @param connection - instance of the connection with the hardware device.
- * @return
- */
-const closePort = (connection: any) => {
-  connection.close();
-};
-
-/**
  * Helper function: This method creates a connection on the given port
  *
  *
@@ -50,7 +31,7 @@ const createPortConnection = (port: any) => {
  *
  * ```
  */
-const createPort = async () => {
+export const createPort = async () => {
   const connectionInfo = await getAvailableConnectionInfo();
 
   if (!connectionInfo) {
@@ -67,4 +48,31 @@ const createPort = async () => {
   }
 };
 
-export { createPort, closePort };
+export const openConnection = (connection: SerialPort) => {
+  return new Promise<void>((resolve, reject) =>
+    connection.open((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    })
+  );
+};
+
+export const closeConnection = (connection: SerialPort) => {
+  return new Promise<void>((resolve, reject) => {
+    if (connection.isOpen) {
+      resolve();
+      return;
+    }
+
+    connection.close((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};

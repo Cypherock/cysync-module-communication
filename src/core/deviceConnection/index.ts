@@ -4,13 +4,13 @@ import SerialPort from 'serialport';
 import { xmodemDecode, createAckPacket, DecodedPacketData } from '../../xmodem';
 import { PacketVersionMap, PacketVersion } from '../../utils/versions';
 import { commands } from '../../config';
-import { openConnection, closeConnection } from '../port';
+import { openConnection, closeConnection } from './utils';
 import { logger } from '../../utils';
 import { PacketData, DeviceConnectionInterface } from './types';
 import { sendData } from './sendData';
 import { receiveCommand } from './receiveData';
 
-export class DeviceListener
+export class DeviceConnection
   extends EventEmitter
   implements DeviceConnectionInterface
 {
@@ -105,8 +105,11 @@ export class DeviceListener
           this.connection.isOpen &&
           !this.connection.destroyed
         ) {
-          if (newPacket.errorList.length <= 0) {
-            if (!this.isInfoPacket(newPacket)) {
+          if (this.isInfoPacket(newPacket)) {
+            console.log('Broadcasting ACK or NACK');
+            this.broadcastPacket(newPacket);
+          } else {
+            if (newPacket.errorList.length <= 0) {
               console.log('Sending ACK');
               const ackPacket = createAckPacket(
                 this.usableCommands.ACK_PACKET,
@@ -124,23 +127,20 @@ export class DeviceListener
                 resolve();
               });
             } else {
-              console.log('Broadcasting ACK or NACK');
-              this.broadcastPacket(newPacket);
+              console.log('Sending NACK');
+              const nackPacket = createAckPacket(
+                this.usableCommands.NACK_PACKET,
+                `0x${newPacket.currentPacketNumber.toString(16)}`,
+                this.packetVersion
+              );
+              this.connection.write(Buffer.from(nackPacket, 'hex'), error => {
+                if (error) {
+                  logger.error('Error in sending NACK');
+                  logger.error(error);
+                }
+                resolve();
+              });
             }
-          } else {
-            console.log('Sending NACK');
-            const nackPacket = createAckPacket(
-              this.usableCommands.NACK_PACKET,
-              `0x${newPacket.currentPacketNumber.toString(16)}`,
-              this.packetVersion
-            );
-            this.connection.write(Buffer.from(nackPacket, 'hex'), error => {
-              if (error) {
-                logger.error('Error in sending NACK');
-                logger.error(error);
-              }
-              resolve();
-            });
           }
         }
       } catch (error) {
@@ -159,15 +159,15 @@ export class DeviceListener
   }
 
   public onPacketUse(packetId: string) {
-    console.log("Paket used: " + packetId);
-    console.log("Before pool size: "+ this.poolData.length);
+    console.log('Paket used: ' + packetId);
+    console.log('Before pool size: ' + this.poolData.length);
     this.poolData = this.poolData.filter(elem => elem.id !== packetId);
-    console.log("After pool size: "+ this.poolData.length);
+    console.log('After pool size: ' + this.poolData.length);
   }
 
   public getPacketsFromPool(commandTypes: number[]) {
     const packets: PacketData[] = [];
-    console.log("Pool Size: " + this.poolData.length);
+    console.log('Pool Size: ' + this.poolData.length);
     console.log(this.poolData);
 
     for (const packet of this.poolData) {

@@ -123,7 +123,7 @@ export const sendData = async (
   /**
    * Create a list of each packet and self contained retries and listener
    */
-  const dataList = packetsList.map(d => {
+  const dataList = packetsList.map((d, i) => {
     return async (resolve: any, reject: any) => {
       let tries = 1;
       let _maxTries = maxTries;
@@ -132,6 +132,7 @@ export const sendData = async (
       let lastError: Error | undefined;
       while (tries <= _maxTries) {
         try {
+          console.log("\tSending packet: " + i)
           await writePacket(connection, d, version);
           resolve(true);
           return;

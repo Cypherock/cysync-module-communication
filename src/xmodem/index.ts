@@ -152,7 +152,7 @@ export const xmodemDecode = (
       .toString(16)
       .padStart(4, '0');
 
-    let errorList = [];
+    const errorList = [];
     if (startOfFrame.toUpperCase() !== START_OF_FRAME) {
       errorList.push('Invalid Start of frame');
     }

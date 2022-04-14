@@ -1,8 +1,9 @@
 import SerialPort from 'serialport';
 
-import { DeviceConnection } from './deviceConnection';
-
 import { DeviceError, DeviceErrorType } from '../errors';
+
+import { DeviceConnection } from './deviceConnection';
+import { IConnectionInfo } from './types';
 
 const supportedVersionsToDeviceState: Record<string, string> = {
   // Bootloader
@@ -12,14 +13,6 @@ const supportedVersionsToDeviceState: Record<string, string> = {
   // Main
   '03': '02'
 };
-
-export interface IConnectionInfo {
-  port: SerialPort.PortInfo;
-  deviceState: string;
-  hardwareVersion: string;
-  inBootloader: boolean;
-  serial: string | undefined;
-}
 
 export const getAvailableConnectionInfo = async (): Promise<
   IConnectionInfo | undefined
@@ -141,7 +134,7 @@ export const createPort = async () => {
   if (!connectionInfo) {
     throw new DeviceError(DeviceErrorType.NOT_CONNECTED);
   } else {
-    const connection = new DeviceConnection(connectionInfo.port.path);
+    const connection = new DeviceConnection(connectionInfo);
 
     return {
       connection,

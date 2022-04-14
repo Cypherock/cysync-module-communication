@@ -1,18 +1,14 @@
-import { DeviceError, DeviceErrorType } from '../../errors';
-import { logger } from '../../utils';
-import { commands, constants } from '../../config';
-import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { xmodemEncode } from '../../xmodem';
+import { commands, constants } from '../config';
+import { DeviceError, DeviceErrorType } from '../errors';
+import { logger } from '../utils';
+import { PacketVersion, PacketVersionMap } from '../utils/versions';
+import { xmodemEncode } from '../xmodem';
+
 import { DeviceConnectionInterface, PacketData } from './types';
 
 /**
  * Writes the packet to the SerialPort on the given connection,
  * and rejects the promise if there is no acknowledgment from the device
- *
- *
- * @param connection - SerialPort connection instance
- * @param packet - packet to send to the hardware
- * @return
  */
 export const writePacket = (
   connection: DeviceConnectionInterface,
@@ -46,7 +42,7 @@ export const writePacket = (
       if (ePacket.commandType === usableCommands.ACK_PACKET) {
         resolve();
       } else if (ePacket.commandType === usableCommands.NACK_PACKET) {
-        logger.warn("Received NACK");
+        logger.warn('Received NACK');
         reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
       }
     }
@@ -69,18 +65,19 @@ export const writePacket = (
     connection.addListener('ack', dataListener);
     connection.addListener('close', onClose);
 
-    connection.connection.write(Buffer.from(packet, 'hex'), (err: any) => {
-      if (err) {
+    connection
+      .write(packet)
+      .then(() => {})
+      .catch(error => {
         if (timeout) {
           clearTimeout(timeout);
         }
         connection.removeListener('ack', dataListener);
         connection.removeListener('close', onClose);
-        logger.error(err);
+        logger.error(error);
         reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
         return;
-      }
-    });
+      });
 
     timeout = setTimeout(() => {
       connection.removeListener('ack', dataListener);
@@ -116,14 +113,13 @@ export const sendData = async (
   maxTries = 5
 ) => {
   const packetsList = xmodemEncode(data, command, version);
-  console.log(packetsList);
   logger.info(
     `Sending command ${command} : containing ${packetsList.length} packets.`
   );
   /**
    * Create a list of each packet and self contained retries and listener
    */
-  const dataList = packetsList.map((d, i) => {
+  const dataList = packetsList.map(d => {
     return async (resolve: any, reject: any) => {
       let tries = 1;
       let _maxTries = maxTries;
@@ -132,7 +128,6 @@ export const sendData = async (
       let lastError: Error | undefined;
       while (tries <= _maxTries) {
         try {
-          console.log("\tSending packet: " + i)
           await writePacket(connection, d, version);
           resolve(true);
           return;

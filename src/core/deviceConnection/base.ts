@@ -1,0 +1,111 @@
+import { EventEmitter } from 'events';
+import SerialPort from 'serialport';
+import * as uuid from 'uuid';
+
+import { logger } from '../../utils';
+import { IConnectionInfo } from '../types';
+import { closeConnection, openConnection } from '../utils';
+
+export interface BaseDeviceConnectionOptions {
+  autoOpen?: boolean;
+}
+
+export class BaseDeviceConnection extends EventEmitter {
+  public port: string;
+  public deviceState: string;
+  public inBootloader: boolean;
+  public hardwareVersion: string;
+  public serial?: string;
+  public connectionId: string;
+
+  protected connection: SerialPort;
+
+  private autoOpen: boolean;
+
+  constructor(params: IConnectionInfo, options?: BaseDeviceConnectionOptions) {
+    super();
+    this.port = params.port.path;
+    this.deviceState = params.deviceState;
+    this.inBootloader = params.inBootloader;
+    this.hardwareVersion = params.hardwareVersion;
+    this.serial = params.serial;
+    this.autoOpen = options?.autoOpen || false;
+
+    this.connectionId = uuid.v4();
+
+    this.connection = new SerialPort(this.port, {
+      baudRate: 115200,
+      autoOpen: this.autoOpen
+    });
+  }
+
+  /**
+   * Returns if the device is connected or not
+   */
+  public isConnected() {
+    return this.connection && !this.connection.destroyed;
+  }
+
+  /**
+   * Returns if the device connection is open, i.e., if it's ready to communicate.
+   */
+  public isOpen() {
+    return this.isConnected() && this.connection.isOpen;
+  }
+
+  /**
+   * Open the device connection
+   */
+  public open() {
+    if (this.isOpen()) {
+      return;
+    }
+
+    logger.info('Connection open');
+    return openConnection(this.connection);
+  }
+
+  /**
+   * Close the device connection
+   */
+  public close() {
+    logger.info('Connection closed');
+    return closeConnection(this.connection);
+  }
+
+  /**
+   * Run this function before starting every operation on the device.
+   */
+  public async beforeOperation() {
+    await this.open();
+  }
+
+  /**
+   * Run this function after every operation on the device.
+   */
+  public async afterOperation() {
+    if (!this.autoOpen) {
+      await this.close();
+    }
+  }
+
+  /**
+   * Writes a given data string (in hex) to the device.
+   */
+  public write(data: string) {
+    return new Promise<void>(async (resolve, reject) => {
+      try {
+        this.connection.write(Buffer.from(data, 'hex'), error => {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+}

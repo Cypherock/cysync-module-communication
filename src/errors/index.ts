@@ -4,7 +4,8 @@ export enum DeviceErrorType {
   CONNECTION_NOT_OPEN,
   WRITE_ERROR,
   WRITE_TIMEOUT,
-  READ_TIMEOUT
+  READ_TIMEOUT,
+  NO_WORKING_PACKET_VERSION
 }
 
 const defaultErrorMessages = {
@@ -14,7 +15,9 @@ const defaultErrorMessages = {
   [DeviceErrorType.WRITE_ERROR]: 'Unable to write packet to the device',
   [DeviceErrorType.WRITE_TIMEOUT]: 'Did not receive ACK of sent packet on time',
   [DeviceErrorType.READ_TIMEOUT]:
-    'Did not receive the expected data from device on time'
+    'Did not receive the expected data from device on time',
+  [DeviceErrorType.NO_WORKING_PACKET_VERSION]:
+    'No packet version is working with this device.'
 };
 
 export class DeviceError extends Error {

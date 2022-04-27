@@ -91,7 +91,12 @@ export class DeviceConnection
     const data = xmodemDecode(packet, pVersion);
 
     for (const p of data) {
-      await this.processPacket(p, pVersion);
+      try {
+        await this.processPacket(p, pVersion);
+      } catch (error) {
+        logger.error('Error in processing packet');
+        logger.error(error);
+      }
     }
   }
 
@@ -113,51 +118,62 @@ export class DeviceConnection
     packet: DecodedPacketData,
     pVersion: PacketVersion
   ) {
-    return new Promise<void>((resolve, _reject) => {
+    return new Promise<void>((resolve, reject) => {
       try {
         const newPacket: PacketData = { ...packet, id: uuid.v4() };
-        if (this.isOpen()) {
-          if (this.isInfoPacket(newPacket)) {
-            this.broadcastPacket(newPacket);
-          } else {
-            if (newPacket.errorList.length <= 0) {
-              const ackPacket = createAckPacket(
-                this.usableCommands.ACK_PACKET,
-                `0x${newPacket.currentPacketNumber.toString(16)}`,
-                pVersion
-              );
-              this.write(ackPacket)
-                .then(() => {})
-                .catch(error => {
-                  logger.error('Error in sending ACK');
-                  logger.error(error);
-                })
-                .finally(() => {
-                  this.poolData.push(newPacket);
-                  this.broadcastPacket(newPacket);
-                  resolve();
-                });
-            } else {
-              const nackPacket = createAckPacket(
-                this.usableCommands.NACK_PACKET,
-                `0x${newPacket.currentPacketNumber.toString(16)}`,
-                pVersion
-              );
-              this.write(nackPacket)
-                .then(() => {})
-                .catch(error => {
-                  logger.error('Error in sending NACK');
-                  logger.error(error);
-                })
-                .finally(() => {
-                  resolve();
-                });
-            }
-          }
+
+        // Ignore the packet if connection is not open
+        if (!this.isOpen()) {
+          return reject(new DeviceError(DeviceErrorType.CONNECTION_NOT_OPEN));
+        }
+
+        // Broadcast if it's an info packet
+        if (this.isInfoPacket(newPacket)) {
+          this.broadcastPacket(newPacket);
+          return resolve();
+        }
+
+        // Send nack if packet has errors
+        if (newPacket.errorList.length > 0) {
+          const nackPacket = createAckPacket(
+            this.usableCommands.NACK_PACKET,
+            `0x${newPacket.currentPacketNumber.toString(16)}`,
+            pVersion
+          );
+          this.write(nackPacket)
+            .then(() => {
+              resolve();
+            })
+            .catch(error => {
+              logger.error('Error in sending NACK');
+              logger.error(error);
+              reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
+            });
+        } else {
+          const ackPacket = createAckPacket(
+            this.usableCommands.ACK_PACKET,
+            `0x${newPacket.currentPacketNumber.toString(16)}`,
+            pVersion
+          );
+          this.write(ackPacket)
+            .then(() => {
+              this.poolData.push(newPacket);
+              this.broadcastPacket(newPacket);
+              resolve();
+            })
+            .catch(error => {
+              logger.error('Error in sending ACK');
+              logger.error(error);
+
+              // Add packet to pool even of ACK was not sent
+              this.poolData.push(newPacket);
+              this.broadcastPacket(newPacket);
+
+              reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
+            });
         }
       } catch (error) {
-        logger.error('Error in adding packet to pool');
-        logger.error(error);
+        reject(error);
       }
     });
   }
@@ -211,17 +227,15 @@ export class DeviceConnection
   private checkPacketVersion(version: PacketVersion) {
     return new Promise<boolean>(async resolve => {
       try {
-        logger.info(`Checking if packet version ${version} works`);
+        logger.debug(`Checking if packet version ${version} works`);
 
         await sendData(this, 41, '00', version, 2);
-        receiveCommand(this, [42], version, 2000)
+        receiveCommand(this, [42], 2000)
           .then(() => {
             resolve(true);
           })
-          .catch(error => {
-            if (error) {
-              resolve(false);
-            }
+          .catch(_error => {
+            resolve(false);
           });
       } catch (error) {
         resolve(false);
@@ -307,42 +321,16 @@ export class DeviceConnection
    * Get the unused packets from the pool.
    */
   public getPacketsFromPool(commandTypes: number[]) {
-    const packets: PacketData[] = [];
-
-    for (const packet of this.poolData) {
-      if (commandTypes.includes(packet.commandType)) {
-        packets.push(packet);
-      }
-    }
-
-    return packets;
-  }
-
-  /*
-   * In future if we want to run a specific some code before or after running an
-   * operation, we can do it here.
-   *
-   * For example:
-   * - Open the connection before running any operation.
-   * - Closing the connection after every operation.
-   * - etc
-   */
-  private async runOperation<T>(callback: () => Promise<T>): Promise<T> {
-    try {
-      const resp = await callback();
-      return resp;
-    } catch (error) {
-      throw error;
-    }
+    return this.poolData.filter(packet =>
+      commandTypes.includes(packet.commandType)
+    );
   }
 
   /**
    * Sends the data with the specific command type to the device
    */
   public async sendData(command: number, data: string, maxTries?: number) {
-    return this.runOperation(() => {
-      return sendData(this, command, data, this.getPacketVersion(), maxTries);
-    });
+    return sendData(this, command, data, this.getPacketVersion(), maxTries);
   }
 
   /**
@@ -350,9 +338,7 @@ export class DeviceConnection
    * Sends the data with the specific command type to the device.
    */
   public async sendStmData(data: string) {
-    return this.runOperation(() => {
-      return stmUpdateSendData(this, data);
-    });
+    return stmUpdateSendData(this, data);
   }
 
   /**
@@ -362,13 +348,6 @@ export class DeviceConnection
     commandTypes: number[],
     timeout?: number
   ): Promise<{ commandType: number; data: string }> {
-    return this.runOperation(() => {
-      return receiveCommand(
-        this,
-        commandTypes,
-        this.getPacketVersion(),
-        timeout
-      );
-    });
+    return receiveCommand(this, commandTypes, timeout);
   }
 }

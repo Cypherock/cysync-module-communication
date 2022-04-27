@@ -133,16 +133,16 @@ export const createPort = async () => {
 
   if (!connectionInfo) {
     throw new DeviceError(DeviceErrorType.NOT_CONNECTED);
-  } else {
-    const connection = new DeviceConnection(connectionInfo);
-
-    return {
-      connection,
-      serial: connectionInfo.serial,
-      hardwareVersion: connectionInfo.hardwareVersion,
-      inBootloader: connectionInfo.inBootloader,
-      // 00: Bootloader, 01: Initial app, 02: Main app
-      deviceState: connectionInfo.deviceState
-    };
   }
+
+  const connection = new DeviceConnection(connectionInfo);
+
+  return {
+    connection,
+    serial: connectionInfo.serial,
+    hardwareVersion: connectionInfo.hardwareVersion,
+    inBootloader: connectionInfo.inBootloader,
+    // 00: Bootloader, 01: Initial app, 02: Main app
+    deviceState: connectionInfo.deviceState
+  };
 };

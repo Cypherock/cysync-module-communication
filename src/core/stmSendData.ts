@@ -111,7 +111,7 @@ export const stmUpdateSendData = async (
   const dataList = packetsList.map((d: any, index: number) => {
     return async (resolve: any, reject: any) => {
       let tries = 1;
-      let lastError: Error | undefined;
+      let firstError: Error | undefined;
       while (tries <= 5) {
         try {
           const errorMsg = await writePacket(
@@ -125,17 +125,18 @@ export const stmUpdateSendData = async (
             resolve(true);
             return;
           } else {
-            reject(errorMsg);
-            return;
+            return reject(errorMsg);
           }
         } catch (e) {
-          lastError = e as Error;
+          if (!firstError) {
+            firstError = e as Error;
+          }
           logger.warn('Error in sending data', e);
         }
         tries++;
       }
-      if (lastError) {
-        reject(lastError);
+      if (firstError) {
+        reject(firstError);
       } else {
         reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
       }

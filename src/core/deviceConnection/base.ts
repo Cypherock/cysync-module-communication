@@ -97,8 +97,7 @@ export class BaseDeviceConnection extends EventEmitter {
       try {
         this.connection.write(Buffer.from(data, 'hex'), error => {
           if (error) {
-            reject(error);
-            return;
+            return reject(error);
           }
 
           resolve();

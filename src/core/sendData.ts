@@ -39,11 +39,12 @@ export const writePacket = (
       connection.removeListener('ack', dataListener);
       connection.removeListener('close', onClose);
 
-      if (ePacket.commandType === usableCommands.ACK_PACKET) {
-        resolve();
-      } else if (ePacket.commandType === usableCommands.NACK_PACKET) {
-        logger.warn('Received NACK');
-        reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
+      switch (ePacket.commandType) {
+        case usableCommands.ACK_PACKET:
+          return resolve();
+        case usableCommands.NACK_PACKET:
+          logger.warn('Received NACK');
+          return reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
       }
     }
 
@@ -125,7 +126,7 @@ export const sendData = async (
       let _maxTries = maxTries;
       if (command === 255) _maxTries = 1;
 
-      let lastError: Error | undefined;
+      let firstError: Error | undefined;
       while (tries <= _maxTries) {
         try {
           await writePacket(connection, d, version);
@@ -145,14 +146,16 @@ export const sendData = async (
             }
           }
 
-          lastError = e as Error;
+          if (!firstError) {
+            firstError = e as Error;
+          }
           logger.warn('Error in sending data', e);
         }
         tries++;
       }
 
-      if (lastError) {
-        reject(lastError);
+      if (firstError) {
+        reject(firstError);
       } else {
         reject(new DeviceError(DeviceErrorType.WRITE_TIMEOUT));
       }

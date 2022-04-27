@@ -3,8 +3,7 @@ import SerialPort from 'serialport';
 export const openConnection = (connection: SerialPort) => {
   return new Promise<void>((resolve, reject) => {
     if (connection.isOpen) {
-      resolve();
-      return;
+      return resolve();
     }
 
     connection.open(err => {
@@ -20,8 +19,7 @@ export const openConnection = (connection: SerialPort) => {
 export const closeConnection = (connection: SerialPort) => {
   return new Promise<void>((resolve, reject) => {
     if (!connection.isOpen) {
-      resolve();
-      return;
+      return resolve();
     }
 
     connection.close(err => {

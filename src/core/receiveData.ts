@@ -1,6 +1,5 @@
 import { DeviceError, DeviceErrorType } from '../errors';
 import { logger } from '../utils';
-import { PacketVersion } from '../utils/versions';
 
 import { DeviceConnectionInterface, PacketData } from './types';
 
@@ -12,15 +11,13 @@ const DEFAULT_RECEIVE_TIMEOUT = 15000;
 export const receiveCommand = (
   connection: DeviceConnectionInterface,
   allAcceptableCommands: number[],
-  _version: PacketVersion,
   timeout: number = DEFAULT_RECEIVE_TIMEOUT
 ) => {
   const resData: any = [];
   return new Promise<{ commandType: number; data: string }>(
     (resolve, reject) => {
       if (!connection.isConnected()) {
-        reject(new DeviceError(DeviceErrorType.NOT_CONNECTED));
-        return;
+        return reject(new DeviceError(DeviceErrorType.NOT_CONNECTED));
       }
 
       let timeoutIdentifier: NodeJS.Timeout | null = null;

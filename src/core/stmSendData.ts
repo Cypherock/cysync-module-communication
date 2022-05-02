@@ -122,8 +122,7 @@ export const stmUpdateSendData = async (
             index === 0 ? { timeout: 10000 } : undefined
           );
           if (!errorMsg) {
-            resolve(true);
-            return;
+            return resolve(true);
           } else {
             return reject(errorMsg);
           }

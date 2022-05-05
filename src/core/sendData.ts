@@ -1,32 +1,24 @@
-import SerialPort from 'serialport';
-
-import { byteStuffing, intToUintByte } from '../bytes';
-import { commands, constants, radix } from '../config';
+import { commands, constants } from '../config';
 import { DeviceError, DeviceErrorType } from '../errors';
 import { logger } from '../utils';
 import { PacketVersion, PacketVersionMap } from '../utils/versions';
-import { xmodemDecode, xmodemEncode } from '../xmodem';
+import { xmodemEncode } from '../xmodem';
 
-import { crc16 } from './crc';
+import { DeviceConnectionInterface, PacketData } from './types';
 
 /**
  * Writes the packet to the SerialPort on the given connection,
  * and rejects the promise if there is no acknowledgment from the device
- *
- *
- * @param connection - SerialPort connection instance
- * @param packet - packet to send to the hardware
- * @return
  */
-const writePacket = (
-  connection: SerialPort,
+export const writePacket = (
+  connection: DeviceConnectionInterface,
   packet: any,
   version: PacketVersion
 ) => {
   let usableConstants = constants.v1;
   const usableCommands = commands.v1;
 
-  if (!connection.isOpen || connection.destroyed) {
+  if (!connection.isConnected()) {
     throw new DeviceError(DeviceErrorType.CONNECTION_CLOSED);
   }
 
@@ -37,57 +29,59 @@ const writePacket = (
   /**
    * Be sure to remove all listeners and timeout.
    */
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     let timeout: NodeJS.Timeout;
 
-    /**
-     * Ensure is listener is activated first before writing
-     */
-    function dataListener(ePacket: any) {
-      const data = xmodemDecode(ePacket, version);
-      data.forEach(d => {
-        const { commandType } = d;
-        if (Number(commandType) === usableCommands.ACK_PACKET) {
-          if (timeout) {
-            clearTimeout(timeout);
-          }
-          resolve(true);
-          connection.removeListener('data', dataListener);
-          connection.removeListener('close', onClose);
-        }
-      });
-    }
-
-    function onClose(error: any) {
+    function dataListener(ePacket: PacketData) {
       if (timeout) {
         clearTimeout(timeout);
       }
-      connection.removeListener('data', dataListener);
+      connection.removeListener('ack', dataListener);
       connection.removeListener('close', onClose);
-      if (error) {
-        logger.error(error);
+
+      switch (ePacket.commandType) {
+        case usableCommands.ACK_PACKET:
+          return resolve();
+        case usableCommands.NACK_PACKET:
+          logger.warn('Received NACK');
+          return reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
       }
+    }
+
+    function onClose(err: any) {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+
+      connection.removeListener('ack', dataListener);
+      connection.removeListener('close', onClose);
+
+      if (err) {
+        logger.error(err);
+      }
+
       reject(new DeviceError(DeviceErrorType.CONNECTION_CLOSED));
     }
 
-    connection.addListener('data', dataListener);
+    connection.addListener('ack', dataListener);
     connection.addListener('close', onClose);
 
-    connection.write(Buffer.from(packet, 'hex'), (err: any) => {
-      if (err) {
+    connection
+      .write(packet)
+      .then(() => {})
+      .catch(error => {
         if (timeout) {
           clearTimeout(timeout);
         }
-        connection.removeListener('data', dataListener);
+        connection.removeListener('ack', dataListener);
         connection.removeListener('close', onClose);
-        logger.error(err);
+        logger.error(error);
         reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
         return;
-      }
-    });
+      });
 
     timeout = setTimeout(() => {
-      connection.removeListener('data', dataListener);
+      connection.removeListener('ack', dataListener);
       connection.removeListener('close', onClose);
       reject(new DeviceError(DeviceErrorType.WRITE_TIMEOUT));
     }, usableConstants.ACK_TIME);
@@ -112,8 +106,8 @@ const writePacket = (
  * @param data - data in hex format
  * @return
  */
-const sendData = async (
-  connection: SerialPort,
+export const sendData = async (
+  connection: DeviceConnectionInterface,
   command: number,
   data: string,
   version: PacketVersion,
@@ -132,7 +126,7 @@ const sendData = async (
       let _maxTries = maxTries;
       if (command === 255) _maxTries = 1;
 
-      let lastError: Error | undefined;
+      let firstError: Error | undefined;
       while (tries <= _maxTries) {
         try {
           await writePacket(connection, d, version);
@@ -152,14 +146,16 @@ const sendData = async (
             }
           }
 
-          lastError = e as Error;
+          if (!firstError) {
+            firstError = e as Error;
+          }
           logger.warn('Error in sending data', e);
         }
         tries++;
       }
 
-      if (lastError) {
-        reject(lastError);
+      if (firstError) {
+        reject(firstError);
       } else {
         reject(new DeviceError(DeviceErrorType.WRITE_TIMEOUT));
       }
@@ -181,49 +177,3 @@ const sendData = async (
   }
   logger.info(`Sent command ${command} : ${data}`);
 };
-
-/**
- * Returns the acknowledgement packet for a specified command number and packet number.
- *
- * @param commandType - command Number
- * @param packetNumber - packet Number
- * @return
- */
-const ackData = (
-  commandType: number,
-  packetNumber: string,
-  version: PacketVersion
-) => {
-  let usableConstants = constants.v1;
-  let usableRadix = radix.v1;
-
-  if (version === PacketVersionMap.v2) {
-    usableConstants = constants.v2;
-    usableRadix = radix.v2;
-  }
-
-  const { START_OF_FRAME } = usableConstants;
-
-  const currentPacketNumber = intToUintByte(
-    packetNumber,
-    usableRadix.currentPacketNumber
-  );
-
-  const totalPacket = intToUintByte(0, usableRadix.totalPacket);
-  const dataChunk = '00000000';
-  const commData = currentPacketNumber + totalPacket + dataChunk;
-  const crc = crc16(Buffer.from(commData, 'hex')).toString(16).padStart(4, '0');
-  const temp = commData + crc;
-  const stuffedData = byteStuffing(Buffer.from(temp, 'hex'), version).toString(
-    'hex'
-  );
-
-  const commHeader =
-    START_OF_FRAME +
-    intToUintByte(commandType, usableRadix.commandType) +
-    intToUintByte(stuffedData.length / 2, usableRadix.dataSize);
-
-  return commHeader + stuffedData;
-};
-
-export { ackData, sendData };

@@ -1,5 +1,10 @@
 import SerialPort from 'serialport';
 
+import { DeviceError, DeviceErrorType } from '../errors';
+
+import { DeviceConnection } from './deviceConnection';
+import { IConnectionInfo } from './types';
+
 const supportedVersionsToDeviceState: Record<string, string> = {
   // Bootloader
   '01': '00',
@@ -9,15 +14,7 @@ const supportedVersionsToDeviceState: Record<string, string> = {
   '03': '02'
 };
 
-interface IConnectionInfo {
-  port: SerialPort.PortInfo;
-  deviceState: string;
-  hardwareVersion: string;
-  inBootloader: boolean;
-  serial: string | undefined;
-}
-
-const getAvailableConnectionInfo = async (): Promise<
+export const getAvailableConnectionInfo = async (): Promise<
   IConnectionInfo | undefined
 > => {
   const list = await SerialPort.list();
@@ -103,7 +100,7 @@ const getAvailableConnectionInfo = async (): Promise<
  * @return
  */
 
-const checkForConnection = async (
+export const checkForConnection = async (
   setConnectionStatus: (value: boolean) => void,
   interval = 1
 ) => {
@@ -118,4 +115,34 @@ const checkForConnection = async (
   }, interval * 1000);
 };
 
-export { checkForConnection, getAvailableConnectionInfo, IConnectionInfo };
+/**
+ * This method finds the port on which the hardware wallet is connected
+ * and returns a SerialPort connection instance with the hardware wallet
+ * or throws an error 'Device not connected'.
+ *
+ * @example
+ * ```typescript
+ * import {createPort} from '@cypherock/communication'
+ *
+ * const connection = await createPort();
+ *
+ * ```
+ */
+export const createPort = async () => {
+  const connectionInfo = await getAvailableConnectionInfo();
+
+  if (!connectionInfo) {
+    throw new DeviceError(DeviceErrorType.NOT_CONNECTED);
+  }
+
+  const connection = new DeviceConnection(connectionInfo);
+
+  return {
+    connection,
+    serial: connectionInfo.serial,
+    hardwareVersion: connectionInfo.hardwareVersion,
+    inBootloader: connectionInfo.inBootloader,
+    // 00: Bootloader, 01: Initial app, 02: Main app
+    deviceState: connectionInfo.deviceState
+  };
+};

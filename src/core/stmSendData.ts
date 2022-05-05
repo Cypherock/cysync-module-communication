@@ -2,6 +2,8 @@ import { DeviceError, DeviceErrorType } from '../errors';
 import { logger } from '../utils';
 import { stmXmodemEncode } from '../xmodem';
 
+import { DeviceConnectionInterface } from './types';
+
 const ACK_PACKET = '06';
 const ERROR_CODES = [
   {
@@ -31,7 +33,7 @@ const ERROR_CODES = [
  * throws error if unable to send packet.
  */
 const writePacket = (
-  connection: any,
+  connection: DeviceConnectionInterface,
   packet: any,
   options?: { timeout?: number }
 ): Promise<string | undefined> => {
@@ -39,6 +41,12 @@ const writePacket = (
     /**
      * Ensure is listener is activated first before writing
      */
+    let timeout: NodeJS.Timeout;
+
+    if (!connection.isConnected()) {
+      throw new DeviceError(DeviceErrorType.CONNECTION_CLOSED);
+    }
+
     const eListener = (ePacket: any) => {
       const ePacketData = ePacket.toString('hex');
 
@@ -47,6 +55,7 @@ const writePacket = (
         if (ePacketData.includes(errorCode.code)) {
           resolve(errorCode.message);
           connection.removeListener('data', eListener);
+          connection.removeListener('close', onClose);
           return;
         }
       }
@@ -54,33 +63,47 @@ const writePacket = (
       if (ePacketData.includes(ACK_PACKET)) {
         resolve(undefined);
         connection.removeListener('data', eListener);
+        connection.removeListener('close', onClose);
       }
     };
 
-    connection.on('data', eListener);
-
-    connection.write(Buffer.from(packet, 'hex'), (err: any) => {
-      if (err) {
-        reject(err);
-        return;
+    function onClose(err: any) {
+      if (timeout) {
+        clearTimeout(timeout);
       }
-    });
 
-    if (options && options.timeout !== undefined) {
-      setTimeout(
-        () => reject(new DeviceError(DeviceErrorType.WRITE_TIMEOUT)),
-        options.timeout
-      );
-    } else {
-      setTimeout(
-        () => reject(new DeviceError(DeviceErrorType.WRITE_TIMEOUT)),
-        2000
-      );
+      connection.removeListener('ack', eListener);
+      connection.removeListener('close', onClose);
+
+      if (err) {
+        logger.error(err);
+      }
+
+      reject(new DeviceError(DeviceErrorType.CONNECTION_CLOSED));
     }
+
+    connection.addListener('data', eListener);
+    connection.addListener('close', onClose);
+
+    connection
+      .write(packet)
+      .then(() => {})
+      .catch(err => {
+        reject(err);
+      });
+
+    timeout = setTimeout(() => {
+      connection.removeListener('data', eListener);
+      connection.removeListener('close', onClose);
+      reject(new DeviceError(DeviceErrorType.WRITE_TIMEOUT));
+    }, options?.timeout || 2000);
   });
 };
 
-export const stmUpdateSendData = async (connection: any, data: string) => {
+export const stmUpdateSendData = async (
+  connection: DeviceConnectionInterface,
+  data: string
+) => {
   const packetsList = stmXmodemEncode(data);
   /**
    * Create a list of each packet and self contained retries and listener
@@ -88,7 +111,7 @@ export const stmUpdateSendData = async (connection: any, data: string) => {
   const dataList = packetsList.map((d: any, index: number) => {
     return async (resolve: any, reject: any) => {
       let tries = 1;
-      let lastError: Error | undefined;
+      let firstError: Error | undefined;
       while (tries <= 5) {
         try {
           const errorMsg = await writePacket(
@@ -99,20 +122,20 @@ export const stmUpdateSendData = async (connection: any, data: string) => {
             index === 0 ? { timeout: 10000 } : undefined
           );
           if (!errorMsg) {
-            resolve(true);
-            return;
+            return resolve(true);
           } else {
-            reject(errorMsg);
-            return;
+            return reject(errorMsg);
           }
         } catch (e) {
-          lastError = e as Error;
+          if (!firstError) {
+            firstError = e as Error;
+          }
           logger.warn('Error in sending data', e);
         }
         tries++;
       }
-      if (lastError) {
-        reject(lastError);
+      if (firstError) {
+        reject(firstError);
       } else {
         reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
       }

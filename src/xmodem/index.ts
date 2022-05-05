@@ -4,6 +4,17 @@ import { crc16 } from '../core';
 import { PacketVersion, PacketVersionMap } from '../utils/versions';
 export * from './stm';
 
+export interface DecodedPacketData {
+  startOfFrame: string;
+  commandType: number;
+  currentPacketNumber: number;
+  totalPacket: number;
+  dataSize: number;
+  dataChunk: string;
+  crc: string;
+  errorList: string[];
+}
+
 /**
  * Encodes the data and command number, and returns a list of packets.
  *
@@ -12,7 +23,7 @@ export * from './stm';
  * @param commandType - The command number to be sent
  * @return list of packets (or list of strings)
  */
-const xmodemEncode = (
+export const xmodemEncode = (
   data: string,
   commandType: number,
   version: PacketVersion
@@ -72,7 +83,10 @@ const xmodemEncode = (
  * @param param - Data in buffer object
  * @return list of decoded packets
  */
-const xmodemDecode = (param: Buffer, version: PacketVersion) => {
+export const xmodemDecode = (
+  param: Buffer,
+  version: PacketVersion
+): DecodedPacketData[] => {
   let usableConstants = constants.v1;
   let usableRadix = radix.v1;
 
@@ -84,7 +98,7 @@ const xmodemDecode = (param: Buffer, version: PacketVersion) => {
   const { CHUNK_SIZE, START_OF_FRAME } = usableConstants;
 
   let data = param.toString('hex').toUpperCase();
-  const packetList: any[] = [];
+  const packetList: DecodedPacketData[] = [];
   let offset = data.indexOf(START_OF_FRAME);
 
   while (data.length > 0) {
@@ -138,15 +152,20 @@ const xmodemDecode = (param: Buffer, version: PacketVersion) => {
       .toString(16)
       .padStart(4, '0');
 
-    let errorList = '';
-    if (startOfFrame.toUpperCase() !== START_OF_FRAME) errorList.concat();
-    errorList += ' Invalid Start of frame ';
-    if (currentPacketNumber > totalPacket)
-      errorList += ' currentPacketNumber is greater than totalPacketNumber ';
-    if (dataSize > CHUNK_SIZE)
+    const errorList = [];
+    if (startOfFrame.toUpperCase() !== START_OF_FRAME) {
+      errorList.push('Invalid Start of frame');
+    }
+    if (currentPacketNumber > totalPacket) {
+      errorList.push('currentPacketNumber is greater than totalPacketNumber');
+    }
+    if (dataSize > CHUNK_SIZE) {
       // chunk size is already 2 times, and data size in worst case(all bytes stuffed) should be less than 2 time the actual chunk size
-      errorList += ' invalid data size ';
-    if (actualCRC !== crc) errorList += ' invalid crc ';
+      errorList.push('invalid data size');
+    }
+    if (actualCRC !== crc) {
+      errorList.push('invalid crc');
+    }
     packetList.push({
       startOfFrame,
       commandType,
@@ -161,4 +180,39 @@ const xmodemDecode = (param: Buffer, version: PacketVersion) => {
   return packetList;
 };
 
-export { xmodemDecode, xmodemEncode };
+export const createAckPacket = (
+  commandType: number,
+  packetNumber: string,
+  version: PacketVersion
+) => {
+  let usableConstants = constants.v1;
+  let usableRadix = radix.v1;
+
+  if (version === PacketVersionMap.v2) {
+    usableConstants = constants.v2;
+    usableRadix = radix.v2;
+  }
+
+  const { START_OF_FRAME } = usableConstants;
+
+  const currentPacketNumber = intToUintByte(
+    packetNumber,
+    usableRadix.currentPacketNumber
+  );
+
+  const totalPacket = intToUintByte(0, usableRadix.totalPacket);
+  const dataChunk = '00000000';
+  const commData = currentPacketNumber + totalPacket + dataChunk;
+  const crc = crc16(Buffer.from(commData, 'hex')).toString(16).padStart(4, '0');
+  const temp = commData + crc;
+  const stuffedData = byteStuffing(Buffer.from(temp, 'hex'), version).toString(
+    'hex'
+  );
+
+  const commHeader =
+    START_OF_FRAME +
+    intToUintByte(commandType, usableRadix.commandType) +
+    intToUintByte(stuffedData.length / 2, usableRadix.dataSize);
+
+  return commHeader + stuffedData;
+};

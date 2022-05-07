@@ -33,10 +33,19 @@ export class BaseDeviceConnection extends EventEmitter {
 
     this.connectionId = uuid.v4();
 
-    this.connection = new SerialPort(this.port, {
-      baudRate: 115200,
-      autoOpen: this.autoOpen
-    });
+    this.connection = new SerialPort(
+      this.port,
+      {
+        baudRate: 115200,
+        autoOpen: this.autoOpen
+      },
+      this.onSerialPortError.bind(this)
+    );
+  }
+
+  protected onSerialPortError(error: any) {
+    logger.error('Error in serialport');
+    logger.error(error);
   }
 
   /**
@@ -100,7 +109,14 @@ export class BaseDeviceConnection extends EventEmitter {
             return reject(error);
           }
 
-          resolve();
+          // Wait for the write to be completed
+          this.connection.drain(err => {
+            if (err) {
+              return reject(err);
+            }
+
+            resolve();
+          });
         });
       } catch (error) {
         reject(error);

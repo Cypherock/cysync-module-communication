@@ -1,6 +1,6 @@
 {
   "name": "@cypherock/communication",
-  "version": "3.0.1-beta.15",
+  "version": "3.0.1-beta.16",
   "description": "Communication library for Cypherock X1 wallet",
   "main": "dist/app.js",
   "types": "dist/app.d.ts",

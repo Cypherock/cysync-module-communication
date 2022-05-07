@@ -39,20 +39,25 @@ export class DeviceConnection
   /**
    * Starts listening to all the events
    */
-  public startListening() {
+  private startListening() {
     this.isListening = true;
 
     this.connection.addListener('data', this.onData.bind(this));
     this.connection.addListener('close', this.onClose.bind(this));
+    this.connection.addListener('error', this.onSerialPortError.bind(this));
   }
 
   /**
    * Stop listening to all the events
    */
-  public stopListening() {
+  private stopListening() {
     if (this.connection) {
       this.connection.removeListener('data', this.onData.bind(this));
       this.connection.removeListener('close', this.onClose.bind(this));
+      this.connection.removeListener(
+        'error',
+        this.onSerialPortError.bind(this)
+      );
       this.connection.removeAllListeners();
     }
 

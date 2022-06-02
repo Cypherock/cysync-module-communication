@@ -234,14 +234,8 @@ export class DeviceConnection
       try {
         logger.debug(`Checking if packet version ${version} works`);
 
-        await sendData(this, 41, '00', version, 2);
-        receiveCommand(this, [42], 2000)
-          .then(() => {
-            resolve(true);
-          })
-          .catch(_error => {
-            resolve(false);
-          });
+        await sendData(this, 41, '00', version, 3);
+        resolve(true);
       } catch (error) {
         resolve(false);
       }

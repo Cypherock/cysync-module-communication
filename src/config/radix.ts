@@ -46,4 +46,15 @@ export const v2 = {
   }
 };
 
+export const v3 = {
+  currentPacketNumber: 16,
+  totalPacket: 16,
+  sequenceNumber: 16,
+  packetType: 8,
+  commandType: 32,
+  payloadLength: 8,
+  dataSize: 16,
+  crc: 16
+};
+
 export default v1;

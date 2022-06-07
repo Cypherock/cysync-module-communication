@@ -4,7 +4,7 @@ import { commands } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
 import { PacketVersion, PacketVersionList } from '../../utils/versions';
-import { createAckPacket, DecodedPacketData, xmodemDecode } from '../../xmodem';
+import { createAckPacket, DecodedPacketData, xmodemDecode } from '../../xmodem/legacy';
 import { receiveCommand } from '../receiveData';
 import { sendData } from '../sendData';
 import { stmUpdateSendData } from '../stmSendData';

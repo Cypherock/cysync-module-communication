@@ -1,6 +1,6 @@
 import { DeviceError, DeviceErrorType } from '../errors';
 import { logger } from '../utils';
-import { stmXmodemEncode } from '../xmodem';
+import { stmXmodemEncode } from '../xmodem/legacy';
 
 import { DeviceConnectionInterface } from './types';
 

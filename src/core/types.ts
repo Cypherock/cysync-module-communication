@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import SerialPort from 'serialport';
 
-import { DecodedPacketData } from '../xmodem';
+import { DecodedPacketData } from '../xmodem/legacy';
 
 export interface IConnectionInfo {
   port: SerialPort.PortInfo;

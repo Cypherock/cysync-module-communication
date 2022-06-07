@@ -3,11 +3,18 @@ import * as uuid from 'uuid';
 import { commands } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
-import { PacketVersion, PacketVersionList } from '../../utils/versions';
-import { createAckPacket, DecodedPacketData, xmodemDecode } from '../../xmodem/legacy';
-import { receiveCommand } from '../receiveData';
-import { sendData } from '../sendData';
-import { stmUpdateSendData } from '../stmSendData';
+import {
+  PacketVersion,
+  PacketVersionList,
+  PacketVersionMap
+} from '../../utils/versions';
+import {
+  createAckPacket,
+  LegacyDecodedPacketData,
+  xmodemDecode
+} from '../../xmodem/legacy';
+import * as legacyCommands from '../operations/legacy';
+import * as operations from '../operations';
 import {
   DeviceConnectionInterface,
   IConnectionInfo,
@@ -93,6 +100,17 @@ export class DeviceConnection
       pVersion = this.getPacketVersion();
     }
 
+    /**
+     * Packets are processed globally only for legacy
+     * packet versions: v1 and v2.
+     *
+     * Other packets are just broadcasted as it is
+     */
+    if (pVersion === PacketVersionMap.v3) {
+      this.broadcastRawPacket(packet);
+      return;
+    }
+
     const data = xmodemDecode(packet, pVersion);
 
     for (const p of data) {
@@ -120,7 +138,7 @@ export class DeviceConnection
    *     - Broadcast packet
    */
   private async processPacket(
-    packet: DecodedPacketData,
+    packet: LegacyDecodedPacketData,
     pVersion: PacketVersion
   ) {
     return new Promise<void>((resolve, reject) => {
@@ -232,9 +250,12 @@ export class DeviceConnection
   private checkPacketVersion(version: PacketVersion) {
     return new Promise<boolean>(async resolve => {
       try {
+        // TODO: Implement different method to verify working packet
+        // version for v3
+
         logger.debug(`Checking if packet version ${version} works`);
 
-        await sendData(this, 41, '00', version, 3);
+        await legacyCommands.sendData(this, 41, '00', version, 3);
         resolve(true);
       } catch (error) {
         resolve(false);
@@ -302,7 +323,7 @@ export class DeviceConnection
    * Checks if the packet is an info packet.
    * Info packets are: ACK, or NACK
    */
-  public isInfoPacket(packet: DecodedPacketData) {
+  public isInfoPacket(packet: LegacyDecodedPacketData) {
     return [
       this.usableCommands.ACK_PACKET,
       this.usableCommands.NACK_PACKET
@@ -326,27 +347,107 @@ export class DeviceConnection
   }
 
   /**
+   * @deprecated
    * Sends the data with the specific command type to the device
    */
   public async sendData(command: number, data: string, maxTries?: number) {
-    return sendData(this, command, data, this.getPacketVersion(), maxTries);
+    return legacyCommands.sendData(
+      this,
+      command,
+      data,
+      this.getPacketVersion(),
+      maxTries
+    );
   }
 
   /**
+   * @deprecated
    * Use only when the device is in bootloader mode.
    * Sends the data with the specific command type to the device.
    */
   public async sendStmData(data: string) {
-    return stmUpdateSendData(this, data);
+    return legacyCommands.stmUpdateSendData(this, data);
   }
 
   /**
+   * @deprecated
    * Receive a specific set of commands from the device.
    */
   public async receiveData(
     commandTypes: number[],
     timeout?: number
   ): Promise<{ commandType: number; data: string }> {
-    return receiveCommand(this, commandTypes, timeout);
+    return legacyCommands.receiveCommand(this, commandTypes, timeout);
+  }
+
+  public async sendCommand(commandType: number, data: string): Promise<void> {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    await operations.sendCommand({
+      connection: this,
+      data,
+      commandType,
+      sequenceNumber: this.getSequenceNumber(),
+      version: this.getPacketVersion(),
+      packetType: commands.v3.PACKET_TYPE.CMD
+    });
+  }
+
+  public async requestStatus(
+    commandType: number,
+    data: string
+  ): Promise<{ data: string; commandType: number }> {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    const resp = await operations.sendCommand({
+      connection: this,
+      data,
+      commandType,
+      sequenceNumber: this.getSequenceNumber(),
+      version: this.getPacketVersion(),
+      packetType: commands.v3.PACKET_TYPE.STATUS_REQ,
+      waitForPacketType: commands.v3.PACKET_TYPE.STATUS
+    });
+
+    if (!resp) {
+      throw new Error('Did not receive the expected data');
+    }
+
+    return resp;
+  }
+
+  public async requestOutput(
+    commandType: number,
+    data: string
+  ): Promise<{ data: string; commandType: number }> {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    const resp = await operations.sendCommand({
+      connection: this,
+      data,
+      commandType,
+      sequenceNumber: this.getSequenceNumber(),
+      version: this.getPacketVersion(),
+      packetType: commands.v3.PACKET_TYPE.CMD_OUTPUT,
+      waitForPacketType: commands.v3.PACKET_TYPE.CMD_OUTPUT_REQ
+    });
+
+    if (!resp) {
+      throw new Error('Did not receive the expected data');
+    }
+
+    return resp;
   }
 }

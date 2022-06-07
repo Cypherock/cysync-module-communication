@@ -4,7 +4,7 @@ import { crc16 } from '../core';
 import { PacketVersion, PacketVersionMap } from '../utils/versions';
 export * from './stm';
 
-export interface DecodedPacketData {
+export interface LegacyDecodedPacketData {
   startOfFrame: string;
   commandType: number;
   currentPacketNumber: number;
@@ -86,7 +86,7 @@ export const xmodemEncode = (
 export const xmodemDecode = (
   param: Buffer,
   version: PacketVersion
-): DecodedPacketData[] => {
+): LegacyDecodedPacketData[] => {
   let usableConstants = constants.v1;
   let usableRadix = radix.v1;
 
@@ -98,7 +98,7 @@ export const xmodemDecode = (
   const { CHUNK_SIZE, START_OF_FRAME } = usableConstants;
 
   let data = param.toString('hex').toUpperCase();
-  const packetList: DecodedPacketData[] = [];
+  const packetList: LegacyDecodedPacketData[] = [];
   let offset = data.indexOf(START_OF_FRAME);
 
   while (data.length > 0) {

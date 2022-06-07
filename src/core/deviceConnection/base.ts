@@ -17,6 +17,7 @@ export class BaseDeviceConnection extends EventEmitter {
   public hardwareVersion: string;
   public serial?: string;
   public connectionId: string;
+  protected sequenceNumber: number;
 
   protected connection: SerialPort;
 
@@ -32,6 +33,7 @@ export class BaseDeviceConnection extends EventEmitter {
     this.autoOpen = options?.autoOpen || false;
 
     this.connectionId = uuid.v4();
+    this.sequenceNumber = 0;
 
     this.connection = new SerialPort(
       this.port,
@@ -46,6 +48,10 @@ export class BaseDeviceConnection extends EventEmitter {
   protected onSerialPortError(error: any) {
     logger.error('Error in serialport');
     logger.error(error);
+  }
+
+  protected getSequenceNumber() {
+    return ++this.sequenceNumber;
   }
 
   /**

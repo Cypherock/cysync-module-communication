@@ -1,8 +1,8 @@
-import { DeviceError, DeviceErrorType } from '../errors';
-import { logger } from '../utils';
-import { stmXmodemEncode } from '../xmodem/legacy';
+import { DeviceError, DeviceErrorType } from '../../../errors';
+import { logger } from '../../../utils';
+import { stmXmodemEncode } from '../../../xmodem/legacy';
 
-import { DeviceConnectionInterface } from './types';
+import { DeviceConnectionInterface } from '../../types';
 
 const ACK_PACKET = '06';
 const ERROR_CODES = [

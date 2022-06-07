@@ -20,6 +20,7 @@ export const v3 = {
   ACK_BYTE: '06',
   CHUNK_SIZE: 42 * 2,
   ACK_TIME: 2000
+  CMD_RESPONSE_TIME: 2000
 };
 
 export default v1;

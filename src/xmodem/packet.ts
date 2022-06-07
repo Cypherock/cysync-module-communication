@@ -8,10 +8,14 @@ export interface DecodedPacketData {
   startOfFrame: string;
   commandType: number;
   currentPacketNumber: number;
-  totalPacket: number;
-  dataSize: number;
-  dataChunk: string;
+  totalPacketNumber: number;
+  protobufDataSize: number;
+  protobufData: string;
+  rawDataSize: number;
+  rawData: string;
   crc: string;
+  sequenceNumber: number;
+  packetType: number;
   errorList: string[];
 }
 
@@ -186,7 +190,7 @@ export const decodedPacket = (
     );
     payloadOffset += usableRadix.commandType / 4;
 
-    const protobufSize = parseInt(
+    const protobufDataSize = parseInt(
       `0x${payload.slice(
         payloadOffset,
         payloadOffset + usableRadix.dataSize / 4
@@ -195,7 +199,7 @@ export const decodedPacket = (
     );
     payloadOffset += usableRadix.dataSize / 4;
 
-    const rawSize = parseInt(
+    const rawDataSize = parseInt(
       `0x${payload.slice(
         payloadOffset,
         payloadOffset + usableRadix.dataSize / 4
@@ -206,18 +210,21 @@ export const decodedPacket = (
 
     const protobufData = payload.slice(
       payloadOffset,
-      payloadOffset + protobufSize * 2
+      payloadOffset + protobufDataSize * 2
     );
-    payloadOffset += protobufSize * 2;
+    payloadOffset += protobufDataSize * 2;
 
-    const rawData = payload.slice(payloadOffset, payloadOffset + rawSize * 2);
-    payloadOffset += rawSize * 2;
+    const rawData = payload.slice(
+      payloadOffset,
+      payloadOffset + rawDataSize * 2
+    );
+    payloadOffset += rawDataSize * 2;
 
     data = data.slice(offset);
 
     const commData =
       intToUintByte(sequenceNumber, usableRadix.sequenceNumber) +
-      intToUintByte(rawSize + protobufSize, usableRadix.dataSize) +
+      intToUintByte(rawDataSize + protobufDataSize, usableRadix.dataSize) +
       intToUintByte(currentPacketNumber, usableRadix.currentPacketNumber) +
       intToUintByte(totalPacketNumber, usableRadix.totalPacket) +
       intToUintByte(packetType, usableRadix.packetType) +
@@ -234,7 +241,7 @@ export const decodedPacket = (
     if (currentPacketNumber > totalPacketNumber) {
       errorList.push('currentPacketNumber is greater than totalPacketNumber');
     }
-    if (rawSize + protobufSize > CHUNK_SIZE) {
+    if (rawDataSize + protobufDataSize > CHUNK_SIZE) {
       errorList.push('invalid data size');
     }
     if (actualCRC.toUpperCase() !== crc.toUpperCase()) {
@@ -243,20 +250,17 @@ export const decodedPacket = (
     packetList.push({
       startOfFrame,
       commandType,
-      currentPacketNumber: Number(`0x${currentPacketNumber}`),
-      totalPacket: Number(`0x${totalPacketNumber}`),
-      dataSize: payloadLength,
-      dataChunk: payload,
+      currentPacketNumber: currentPacketNumber,
+      totalPacketNumber: totalPacketNumber,
       crc: crc,
-      actualCRC,
       protobufData,
       rawData,
-      protobufSize,
-      rawSize,
+      protobufDataSize,
+      rawDataSize,
       errorList,
       sequenceNumber,
       packetType
-    } as DecodedPacketData);
+    });
   }
   return packetList;
 };

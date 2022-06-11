@@ -4,6 +4,7 @@ import { CoinData } from './CoinData';
 import { Erc20CoinData } from './Erc20CoinData';
 import erc20List from './erc20List.json';
 import { EthCoinData } from './EthCoinData';
+import { NearCoinData } from './NearCoinData';
 
 export const BTCCOINS: Record<string, BtcCoinData> = {
   btc: new BtcCoinData({
@@ -86,6 +87,22 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     isTest: true,
     network: 'ropsten',
     chain: 3
+  })
+};
+
+export const NEARCOINS: Record<string, NearCoinData> = {
+  near: new NearCoinData({
+    abbr: 'near',
+    name: 'Near',
+    curve:'ed25519',
+    validatorCoinName: 'near',
+    validatorNetworkType: 'testnet',
+    coinIndex: '8000018d',
+    customCoinIndex: '80000007',
+    decimal: 8,
+    fees: 'Gwei',
+    isTest: true,
+    network: 'testnet',
   })
 };
 
@@ -173,7 +190,8 @@ export const ERC20TOKENS = ERC20TOKENSLIST;
 
 export const COINS: Record<string, CoinData> = {
   ...BTCCOINS,
-  ...ETHCOINS
+  ...ETHCOINS,
+  ...NEARCOINS
 };
 
 export const ALLCOINS: Record<string, AbsCoinData> = {

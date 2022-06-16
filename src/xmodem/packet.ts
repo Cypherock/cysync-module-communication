@@ -88,27 +88,18 @@ export const encodePacket = ({
       usableRadix.timestampLength
     );
     const commData =
-      serializedSequenceNumber +
-      payloadLength +
       currentPacketNumber +
       totalPacketNumber +
+      serializedSequenceNumber +
       serializedPacketType +
+      payloadLength +
       serializedTimestamp +
       payload;
     const crc = intToUintByte(
       crc16(Buffer.from(commData, 'hex')),
       usableRadix.crc
     );
-    const packet =
-      START_OF_FRAME +
-      crc +
-      currentPacketNumber +
-      totalPacketNumber +
-      serializedSequenceNumber +
-      serializedPacketType +
-      payloadLength +
-      serializedTimestamp +
-      payload;
+    const packet = START_OF_FRAME + crc + commData;
 
     packetList.push(packet);
   }
@@ -219,11 +210,11 @@ export const decodedPacket = (
     data = data.slice(offset);
 
     const commData =
-      intToUintByte(sequenceNumber, usableRadix.sequenceNumber) +
-      intToUintByte(payloadLength, usableRadix.payloadLength) +
       intToUintByte(currentPacketNumber, usableRadix.currentPacketNumber) +
       intToUintByte(totalPacketNumber, usableRadix.totalPacket) +
+      intToUintByte(sequenceNumber, usableRadix.sequenceNumber) +
       intToUintByte(packetType, usableRadix.packetType) +
+      intToUintByte(payloadLength, usableRadix.payloadLength) +
       intToUintByte(timestamp, usableRadix.timestampLength) +
       payload;
     const actualCRC = intToUintByte(

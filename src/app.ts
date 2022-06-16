@@ -10,6 +10,7 @@ import { createPort } from './core/connection';
 
 const run = async () => {
   const { connection } = await createPort();
+  await connection.beforeOperation();
   const data = await connection.getStatus(-1);
   console.log({ data });
 };

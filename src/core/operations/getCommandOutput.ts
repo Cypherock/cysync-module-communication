@@ -1,8 +1,16 @@
+import { intToUintByte } from '../../bytes';
 import { commands } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { encodePacket, encodeRawData } from '../../xmodem';
+import {
+  encodePacket,
+  decodeStatus,
+  decodeRawData,
+  DecodedPacketData,
+  RawData,
+  StatusData
+} from '../../xmodem';
 import { waitForPacket } from './receiveCommand';
 
 import { DeviceConnectionInterface } from '../types';
@@ -17,7 +25,7 @@ const writeCommand = async ({
   packet: string;
   version: PacketVersion;
   sequenceNumber: number;
-}): Promise<void> => {
+}): Promise<DecodedPacketData> => {
   if (version !== PacketVersionMap.v3) {
     throw new Error('Only v3 packets are supported');
   }
@@ -28,11 +36,14 @@ const writeCommand = async ({
     throw new DeviceError(DeviceErrorType.CONNECTION_CLOSED);
   }
 
-  return new Promise<void>(async (resolve, reject) => {
+  return new Promise<DecodedPacketData>(async (resolve, reject) => {
     const ackPromise = waitForPacket({
       connection,
       version,
-      packetTypes: [usableCommands.PACKET_TYPE.CMD_ACK],
+      packetTypes: [
+        usableCommands.PACKET_TYPE.CMD_OUTPUT,
+        usableCommands.PACKET_TYPE.STATUS
+      ],
       sequenceNumber
     });
 
@@ -47,12 +58,12 @@ const writeCommand = async ({
       });
 
     ackPromise
-      .then(() => {
+      .then(res => {
         if (ackPromise.isCancelled()) {
           return;
         }
 
-        resolve();
+        resolve(res);
       })
       .catch(error => {
         if (ackPromise.isCancelled()) {
@@ -64,55 +75,66 @@ const writeCommand = async ({
   });
 };
 
-export const sendCommand = async ({
+export const getCommandOutput = async ({
   connection,
-  commandType,
-  data,
   version,
   maxTries = 5,
   sequenceNumber
 }: {
   connection: DeviceConnectionInterface;
-  commandType: number;
-  data: string;
   version: PacketVersion;
   sequenceNumber: number;
   maxTries?: number;
-}): Promise<void> => {
+}): Promise<StatusData | RawData> => {
   if (version !== PacketVersionMap.v3) {
     throw new Error('Only v3 packets are supported');
   }
 
   const usableCommands = commands.v3;
 
-  const packetsList = encodePacket({
-    data: encodeRawData({ commandType, data }, version),
-    version,
-    sequenceNumber,
-    packetType: usableCommands.PACKET_TYPE.CMD
-  });
-
-  logger.info(
-    `Sending command ${commandType} : containing ${packetsList.length} packets.`
-  );
+  logger.info(`Sending command : containing packets.`);
 
   let firstError: Error | undefined;
+  const dataList: string[] = [];
 
-  for (const packet of packetsList) {
+  let totalPackets = 1;
+  let currentPacket = 0;
+  let isStatusResponse = false;
+
+  while (currentPacket < totalPackets) {
     let tries = 1;
     let _maxTries = maxTries;
     firstError = undefined;
     let isSuccess = false;
 
+    const packetsList = encodePacket({
+      data: intToUintByte(currentPacket, 16),
+      version,
+      sequenceNumber,
+      packetType: usableCommands.PACKET_TYPE.CMD_OUTPUT_REQ
+    });
+
+    if (packetsList.length > 1) {
+      throw new Error('Get Command Output exceeded 1 packet limit');
+    }
+
+    const packet = packetsList[0];
+
     while (tries <= _maxTries && !isSuccess) {
       try {
-        await writeCommand({
+        const receivedPacket = await writeCommand({
           connection,
           packet,
           version,
           sequenceNumber
         });
+        dataList[receivedPacket.currentPacketNumber] = receivedPacket.rawData;
+        console.log(receivedPacket);
+        totalPackets = receivedPacket.totalPacketNumber;
+        currentPacket++;
         isSuccess = true;
+        isStatusResponse =
+          receivedPacket.packetType === usableCommands.PACKET_TYPE.STATUS;
       } catch (e) {
         // Don't retry if connection closed
         if (e instanceof DeviceError) {
@@ -141,4 +163,12 @@ export const sendCommand = async ({
       throw firstError;
     }
   }
+
+  const finalData = dataList.join('');
+
+  if (isStatusResponse) {
+    return decodeStatus(finalData, version);
+  }
+
+  return decodeRawData(finalData, version);
 };

@@ -55,7 +55,16 @@ export const v3 = {
   payloadLength: 8,
   timestampLength: 32,
   dataSize: 16,
-  crc: 16
+  crc: 16,
+  status: {
+    deviceState: 8,
+    abortDisabled: 8,
+    cardTap: 16,
+    currentCmdSeq: 16,
+    cmdState: 8,
+    cmdType: 32,
+    cmdStatus: 8
+  }
 };
 
 export default v1;

@@ -2,7 +2,12 @@ import { commands } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { encodePacket, DecodedPacketData } from '../../xmodem';
+import {
+  encodePacket,
+  decodeStatus,
+  StatusData,
+  DecodedPacketData
+} from '../../xmodem';
 import { waitForPacket } from './receiveCommand';
 
 import { DeviceConnectionInterface } from '../types';
@@ -66,17 +71,13 @@ const writeCommand = async ({
 
 export const getStatus = async ({
   connection,
-  data,
   version,
-  maxTries = 5,
-  sequenceNumber
+  maxTries = 5
 }: {
   connection: DeviceConnectionInterface;
-  data: string;
   version: PacketVersion;
-  sequenceNumber: number;
   maxTries?: number;
-}): Promise<string> => {
+}): Promise<StatusData> => {
   if (version !== PacketVersionMap.v3) {
     throw new Error('Only v3 packets are supported');
   }
@@ -84,13 +85,13 @@ export const getStatus = async ({
   const usableCommands = commands.v3;
 
   const packetsList = encodePacket({
-    data,
+    data: '',
     version,
-    sequenceNumber,
+    sequenceNumber: -1,
     packetType: usableCommands.PACKET_TYPE.STATUS_REQ
   });
 
-  console.log({ packetsList, data, sequenceNumber });
+  console.log({ packetsList });
 
   if (packetsList.length === 0) {
     throw new Error('Cound not create packets');
@@ -117,7 +118,7 @@ export const getStatus = async ({
         connection,
         packet,
         version,
-        sequenceNumber
+        sequenceNumber: -1
       });
       finalData = receivedPacket.rawData;
       isSuccess = true;
@@ -149,5 +150,5 @@ export const getStatus = async ({
     throw firstError;
   }
 
-  return finalData;
+  return decodeStatus(finalData, version);
 };

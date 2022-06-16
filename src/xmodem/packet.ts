@@ -19,6 +19,30 @@ export interface DecodedPacketData {
   timestamp: number;
 }
 
+export enum CmdStatus {
+  CMD_STATUS_NONE = 0,
+  CMD_STATUS_RECEIVING = 1,
+  CMD_STATUS_RECEIVED = 2,
+  CMD_STATUS_EXECUTING = 3,
+  CMD_STATUS_DONE = 4,
+  CMD_STATUS_REJECTED = 5
+}
+
+export interface StatusData {
+  deviceState: number;
+  abortDisabled: boolean;
+  cardTapDelta: number[];
+  currentCmdSeq: number;
+  cmdState: number;
+  cmdType: number;
+  cmdStatus: CmdStatus;
+}
+
+export interface RawData {
+  commandType: number;
+  data: string;
+}
+
 export const encodePacket = ({
   data,
   version,
@@ -48,8 +72,13 @@ export const encodePacket = ({
 
   const { CHUNK_SIZE, START_OF_FRAME } = usableConstants;
 
-  const rounds = Math.ceil(data.length / CHUNK_SIZE);
+  let rounds = Math.ceil(data.length / CHUNK_SIZE);
+  let hasNoData = data.length === 0;
   const packetList: string[] = [];
+
+  if (hasNoData) {
+    rounds = 1;
+  }
 
   for (let i = 1; i <= rounds; i += 1) {
     const currentPacketNumber = intToUintByte(
@@ -63,23 +92,29 @@ export const encodePacket = ({
     );
 
     const protobufData = '';
-    const serializedRawDataLength = intToUintByte(
-      dataChunk.length / 2,
-      usableRadix.dataSize
-    );
-    const serializedProtobufDataLength = intToUintByte(
-      protobufData.length / 2,
-      usableRadix.dataSize
-    );
-    const payload =
-      serializedProtobufDataLength +
-      serializedRawDataLength +
-      protobufData +
-      dataChunk;
-    const payloadLength = intToUintByte(
-      payload.length / 2,
-      usableRadix.payloadLength
-    );
+    let payload = '';
+    let payloadLength = intToUintByte(0, usableRadix.payloadLength);
+
+    if (!hasNoData) {
+      const serializedRawDataLength = intToUintByte(
+        dataChunk.length / 2,
+        usableRadix.dataSize
+      );
+      const serializedProtobufDataLength = intToUintByte(
+        protobufData.length / 2,
+        usableRadix.dataSize
+      );
+      payload =
+        serializedProtobufDataLength +
+        serializedRawDataLength +
+        protobufData +
+        dataChunk;
+      payloadLength = intToUintByte(
+        payload.length / 2,
+        usableRadix.payloadLength
+      );
+    }
+
     const serializedTimestamp = intToUintByte(
       new Date()
         .getTime()
@@ -87,13 +122,14 @@ export const encodePacket = ({
         .slice(0, usableRadix.timestampLength / 4),
       usableRadix.timestampLength
     );
+
     const commData =
       currentPacketNumber +
       totalPacketNumber +
       serializedSequenceNumber +
       serializedPacketType +
-      payloadLength +
       serializedTimestamp +
+      payloadLength +
       payload;
     const crc = intToUintByte(
       crc16(Buffer.from(commData, 'hex')),
@@ -161,51 +197,55 @@ export const decodedPacket = (
     );
     offset += usableRadix.packetType / 4;
 
-    const payloadLength = parseInt(
-      `0x${data.slice(offset, offset + usableRadix.payloadLength / 4)}`,
-      16
-    );
-    offset += usableRadix.payloadLength / 4;
-
     const timestamp = parseInt(
       `0x${data.slice(offset, offset + usableRadix.timestampLength / 4)}`,
       16
     );
     offset += usableRadix.timestampLength / 4;
 
-    const payload = data.slice(offset, offset + payloadLength * 2);
-    offset += payloadLength * 2;
-
-    let payloadOffset = 0;
-    const protobufDataSize = parseInt(
-      `0x${payload.slice(
-        payloadOffset,
-        payloadOffset + usableRadix.dataSize / 4
-      )}`,
+    const payloadLength = parseInt(
+      `0x${data.slice(offset, offset + usableRadix.payloadLength / 4)}`,
       16
     );
-    payloadOffset += usableRadix.dataSize / 4;
+    offset += usableRadix.payloadLength / 4;
 
-    const rawDataSize = parseInt(
-      `0x${payload.slice(
+    let payload = '';
+    let protobufDataSize = 0;
+    let rawDataSize = 0;
+    let protobufData = '';
+    let rawData = '';
+    if (payloadLength !== 0) {
+      payload = data.slice(offset, offset + payloadLength * 2);
+      offset += payloadLength * 2;
+
+      let payloadOffset = 0;
+      protobufDataSize = parseInt(
+        `0x${payload.slice(
+          payloadOffset,
+          payloadOffset + usableRadix.dataSize / 4
+        )}`,
+        16
+      );
+      payloadOffset += usableRadix.dataSize / 4;
+
+      rawDataSize = parseInt(
+        `0x${payload.slice(
+          payloadOffset,
+          payloadOffset + usableRadix.dataSize / 4
+        )}`,
+        16
+      );
+      payloadOffset += usableRadix.dataSize / 4;
+
+      protobufData = payload.slice(
         payloadOffset,
-        payloadOffset + usableRadix.dataSize / 4
-      )}`,
-      16
-    );
-    payloadOffset += usableRadix.dataSize / 4;
+        payloadOffset + protobufDataSize * 2
+      );
+      payloadOffset += protobufDataSize * 2;
 
-    const protobufData = payload.slice(
-      payloadOffset,
-      payloadOffset + protobufDataSize * 2
-    );
-    payloadOffset += protobufDataSize * 2;
-
-    const rawData = payload.slice(
-      payloadOffset,
-      payloadOffset + rawDataSize * 2
-    );
-    payloadOffset += rawDataSize * 2;
+      rawData = payload.slice(payloadOffset, payloadOffset + rawDataSize * 2);
+      payloadOffset += rawDataSize * 2;
+    }
 
     data = data.slice(offset);
 
@@ -214,8 +254,8 @@ export const decodedPacket = (
       intToUintByte(totalPacketNumber, usableRadix.totalPacket) +
       intToUintByte(sequenceNumber, usableRadix.sequenceNumber) +
       intToUintByte(packetType, usableRadix.packetType) +
-      intToUintByte(payloadLength, usableRadix.payloadLength) +
       intToUintByte(timestamp, usableRadix.timestampLength) +
+      intToUintByte(payloadLength, usableRadix.payloadLength) +
       payload;
     const actualCRC = intToUintByte(
       crc16(Buffer.from(commData, 'hex')),
@@ -253,6 +293,120 @@ export const decodedPacket = (
   return packetList;
 };
 
+export const decodeStatus = (
+  data: string,
+  version: PacketVersion
+): StatusData => {
+  if (version !== PacketVersionMap.v3) {
+    throw new Error('Only v3 packets are supported');
+  }
+
+  const usableRadix = radix.v3;
+
+  let offset = 0;
+
+  const deviceState = parseInt(
+    `0x${data.slice(offset, offset + usableRadix.status.deviceState / 4)}`,
+    16
+  );
+  offset += usableRadix.status.deviceState / 4;
+
+  const abortDisabled =
+    parseInt(
+      `0x${data.slice(offset, offset + usableRadix.status.abortDisabled / 4)}`,
+      16
+    ) === 1;
+  offset += usableRadix.status.abortDisabled / 4;
+
+  const cardTapDelta: number[] = [];
+  for (let i = 0; i < 4; i++) {
+    const cardTap = parseInt(
+      `0x${data.slice(offset, offset + usableRadix.status.cardTap / 4)}`,
+      16
+    );
+    offset += usableRadix.status.cardTap / 4;
+
+    cardTapDelta.push(cardTap);
+  }
+
+  const currentCmdSeq = parseInt(
+    `0x${data.slice(offset, offset + usableRadix.status.currentCmdSeq / 4)}`,
+    16
+  );
+  offset += usableRadix.status.currentCmdSeq / 4;
+
+  const cmdState = parseInt(
+    `0x${data.slice(offset, offset + usableRadix.status.cmdState / 4)}`,
+    16
+  );
+  offset += usableRadix.status.cmdState / 4;
+
+  const cmdType = parseInt(
+    `0x${data.slice(offset, offset + usableRadix.status.cmdType / 4)}`,
+    16
+  );
+  offset += usableRadix.status.cmdType / 4;
+
+  const cmdStatus = parseInt(
+    `0x${data.slice(offset, offset + usableRadix.status.cmdStatus / 4)}`,
+    16
+  );
+  offset += usableRadix.status.cmdStatus / 4;
+
+  console.log({ offset, len: data.length });
+
+  return {
+    deviceState,
+    abortDisabled,
+    cardTapDelta,
+    currentCmdSeq,
+    cmdState,
+    cmdType,
+    cmdStatus
+  };
+};
+
+export const encodeRawData = (
+  params: RawData,
+  version: PacketVersion
+): string => {
+  if (version !== PacketVersionMap.v3) {
+    throw new Error('Only v3 packets are supported');
+  }
+
+  const usableRadix = radix.v3;
+
+  const data =
+    intToUintByte(params.commandType, usableRadix.commandType) + params.data;
+  return data;
+};
+
+export const decodeRawData = (
+  params: string,
+  version: PacketVersion
+): RawData => {
+  if (version !== PacketVersionMap.v3) {
+    throw new Error('Only v3 packets are supported');
+  }
+
+  const usableRadix = radix.v3;
+
+  let offset = 0;
+
+  const receivedCommandType = parseInt(
+    params.slice(offset, offset + usableRadix.commandType / 4),
+    16
+  );
+  offset += usableRadix.commandType / 4;
+
+  const receivedData = params.slice(offset);
+
+  return { commandType: receivedCommandType, data: receivedData };
+};
+
+// const data = decodeStatus('01000020C471002079170000000000000001', 'v3');
+// console.log(data);
+
 // function randomNumber(min: number, max: number) {
 //   min = Math.ceil(min);
 //   max = Math.floor(max);
@@ -260,9 +414,10 @@ export const decodedPacket = (
 // }
 
 // for (let i = 0; i < 2000; i += 1) {
-//   const data = crypto.randomBytes(randomNumber(0, 200000) * 2).toString('hex');
+//   // const data = crypto.randomBytes(randomNumber(0, 200000) * 2).toString('hex');
 //   const packetType = randomNumber(0, 8);
 //   const sequenceNumber = randomNumber(0, 100);
+//   const data = '';
 
 //   const packetList = encodePacket({
 //     data,
@@ -271,6 +426,7 @@ export const decodedPacket = (
 //     sequenceNumber
 //   });
 //   console.log({ i, totalPackets: packetList.length, dataLen: data.length / 2 });
+//   console.log({ packetList });
 
 //   let totalData: string[] = [];
 //   const decodedPacketList = decodedPacket(
@@ -278,6 +434,7 @@ export const decodedPacket = (
 //     PacketVersionMap.v3
 //   ) as any[];
 
+//   console.log({ decodedPacketList });
 //   for (const decodedPacket of decodedPacketList) {
 //     if (decodedPacket.errorList.length > 0) {
 //       console.log(decodedPacket);

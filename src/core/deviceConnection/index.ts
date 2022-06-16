@@ -13,6 +13,7 @@ import {
   LegacyDecodedPacketData,
   xmodemDecode
 } from '../../xmodem/legacy';
+import { StatusData, RawData } from '../../xmodem';
 import * as legacyCommands from '../operations/legacy';
 import * as operations from '../operations';
 import {
@@ -383,24 +384,27 @@ export class DeviceConnection
     return legacyCommands.receiveCommand(this, commandTypes, timeout);
   }
 
-  // public async sendCommand(commandType: number, data: string): Promise<void> {
-  //   const version = this.getPacketVersion();
+  public async sendCommand(params: {
+    commandType: number;
+    data: string;
+    sequenceNumber: number;
+  }): Promise<void> {
+    const version = this.getPacketVersion();
 
-  //   if (version !== PacketVersionMap.v3) {
-  //     throw new Error('Only v3 packets are supported');
-  //   }
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
 
-  //   await operations.sendCommand({
-  //     connection: this,
-  //     data,
-  //     commandType,
-  //     sequenceNumber: this.getSequenceNumber(),
-  //     version: this.getPacketVersion(),
-  //     packetType: commands.v3.PACKET_TYPE.CMD
-  //   });
-  // }
+    await operations.sendCommand({
+      connection: this,
+      data: params.data,
+      commandType: params.commandType,
+      sequenceNumber: params.sequenceNumber,
+      version: this.getPacketVersion()
+    });
+  }
 
-  public async getStatus(sequenceNumber: number): Promise<{ data: string }> {
+  public async getStatus(): Promise<StatusData> {
     const version = this.getPacketVersion();
 
     if (version !== PacketVersionMap.v3) {
@@ -409,8 +413,6 @@ export class DeviceConnection
 
     const resp = await operations.getStatus({
       connection: this,
-      data: '00',
-      sequenceNumber,
       version: this.getPacketVersion()
     });
 
@@ -418,33 +420,28 @@ export class DeviceConnection
       throw new Error('Did not receive the expected data');
     }
 
-    return { data: resp };
+    return resp;
   }
 
-  // public async requestOutput(
-  //   commandType: number,
-  //   data: string
-  // ): Promise<{ data: string; commandType: number }> {
-  //   const version = this.getPacketVersion();
+  public async getCommandOutput(
+    sequenceNumber: number
+  ): Promise<StatusData | RawData> {
+    const version = this.getPacketVersion();
 
-  //   if (version !== PacketVersionMap.v3) {
-  //     throw new Error('Only v3 packets are supported');
-  //   }
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
 
-  //   const resp = await operations.sendCommand({
-  //     connection: this,
-  //     data,
-  //     commandType,
-  //     sequenceNumber: this.getSequenceNumber(),
-  //     version: this.getPacketVersion(),
-  //     packetType: commands.v3.PACKET_TYPE.CMD_OUTPUT,
-  //     waitForPacketType: commands.v3.PACKET_TYPE.CMD_OUTPUT_REQ
-  //   });
+    const resp = await operations.getCommandOutput({
+      connection: this,
+      sequenceNumber,
+      version: this.getPacketVersion(),
+    });
 
-  //   if (!resp) {
-  //     throw new Error('Did not receive the expected data');
-  //   }
+    if (!resp) {
+      throw new Error('Did not receive the expected data');
+    }
 
-  //   return resp;
-  // }
+    return resp;
+  }
 }

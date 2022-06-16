@@ -50,7 +50,7 @@ export class BaseDeviceConnection extends EventEmitter {
     logger.error(error);
   }
 
-  protected getSequenceNumber() {
+  public getNewSequenceNumber() {
     return ++this.sequenceNumber;
   }
 

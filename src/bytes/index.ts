@@ -9,6 +9,7 @@ const byteUnstuffing = (inputBuff: Buffer, version: PacketVersion): Buffer => {
   }
 
   if (inputBuff.length <= 0) throw new Error('Byte unstuffing failed: 0 size');
+
   const size = inputBuff.length;
   const outputData: any = [];
   for (let i = 0; i < size; i += 1) {

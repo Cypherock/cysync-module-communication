@@ -2,7 +2,7 @@ import { commands } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { encodePacket } from '../../xmodem';
+import { encodePacket, DecodedPacketData } from '../../xmodem';
 import { waitForPacket } from './receiveCommand';
 
 import { DeviceConnectionInterface } from '../types';
@@ -17,7 +17,7 @@ const writeCommand = async ({
   packet: string;
   version: PacketVersion;
   sequenceNumber: number;
-}): Promise<void> => {
+}): Promise<DecodedPacketData> => {
   if (version !== PacketVersionMap.v3) {
     throw new Error('Only v3 packets are supported');
   }
@@ -28,11 +28,11 @@ const writeCommand = async ({
     throw new DeviceError(DeviceErrorType.CONNECTION_CLOSED);
   }
 
-  return new Promise<void>(async (resolve, reject) => {
+  return new Promise<DecodedPacketData>(async (resolve, reject) => {
     const ackPromise = waitForPacket({
       connection,
       version,
-      packetTypes: [usableCommands.PACKET_TYPE.CMD_ACK],
+      packetTypes: [usableCommands.PACKET_TYPE.STATUS],
       sequenceNumber
     });
 
@@ -47,12 +47,12 @@ const writeCommand = async ({
       });
 
     ackPromise
-      .then(() => {
+      .then(res => {
         if (ackPromise.isCancelled()) {
           return;
         }
 
-        resolve();
+        resolve(res);
       })
       .catch(error => {
         if (ackPromise.isCancelled()) {
@@ -64,21 +64,19 @@ const writeCommand = async ({
   });
 };
 
-export const sendCommand = async ({
+export const getStatus = async ({
   connection,
-  commandType,
   data,
   version,
   maxTries = 5,
   sequenceNumber
 }: {
   connection: DeviceConnectionInterface;
-  commandType: number;
   data: string;
   version: PacketVersion;
   sequenceNumber: number;
   maxTries?: number;
-}): Promise<void> => {
+}): Promise<string> => {
   if (version !== PacketVersionMap.v3) {
     throw new Error('Only v3 packets are supported');
   }
@@ -89,56 +87,67 @@ export const sendCommand = async ({
     data,
     version,
     sequenceNumber,
-    packetType: usableCommands.PACKET_TYPE.CMD
+    packetType: usableCommands.PACKET_TYPE.STATUS_REQ
   });
 
-  logger.info(
-    `Sending command ${commandType} : containing ${packetsList.length} packets.`
-  );
+  console.log({ packetsList, data, sequenceNumber });
+
+  if (packetsList.length === 0) {
+    throw new Error('Cound not create packets');
+  }
+
+  if (packetsList.length > 1) {
+    throw new Error('Status command has multiple packets');
+  }
+
+  logger.info(`Sending command : containing ${packetsList.length} packets.`);
 
   let firstError: Error | undefined;
 
-  for (const packet of packetsList) {
-    let tries = 1;
-    let _maxTries = maxTries;
-    firstError = undefined;
-    let isSuccess = false;
+  let tries = 1;
+  let _maxTries = maxTries;
+  firstError = undefined;
+  let isSuccess = false;
+  let finalData = '';
 
-    while (tries <= _maxTries && !isSuccess) {
-      try {
-        await writeCommand({
-          connection,
-          packet,
-          version,
-          sequenceNumber
-        });
-        isSuccess = true;
-      } catch (e) {
-        // Don't retry if connection closed
-        if (e instanceof DeviceError) {
-          if (
-            [
-              DeviceErrorType.CONNECTION_CLOSED,
-              DeviceErrorType.CONNECTION_NOT_OPEN,
-              DeviceErrorType.NOT_CONNECTED,
-              DeviceErrorType.WRITE_REJECTED
-            ].includes(e.errorType)
-          ) {
-            tries = _maxTries;
-          }
+  const packet = packetsList[0];
+  while (tries <= _maxTries && !isSuccess) {
+    try {
+      const receivedPacket = await writeCommand({
+        connection,
+        packet,
+        version,
+        sequenceNumber
+      });
+      finalData = receivedPacket.rawData;
+      isSuccess = true;
+    } catch (e) {
+      // Don't retry if connection closed
+      if (e instanceof DeviceError) {
+        if (
+          [
+            DeviceErrorType.CONNECTION_CLOSED,
+            DeviceErrorType.CONNECTION_NOT_OPEN,
+            DeviceErrorType.NOT_CONNECTED,
+            DeviceErrorType.WRITE_REJECTED
+          ].includes(e.errorType)
+        ) {
+          tries = _maxTries;
         }
-
-        if (!firstError) {
-          firstError = e as Error;
-        }
-
-        logger.warn('Error in sending data', e);
       }
-      tries++;
-    }
 
-    if (firstError) {
-      throw firstError;
+      if (!firstError) {
+        firstError = e as Error;
+      }
+
+      logger.warn('Error in sending data', e);
     }
+    tries++;
   }
+
+  if (firstError) {
+    throw firstError;
+  }
+
+  return finalData;
 };

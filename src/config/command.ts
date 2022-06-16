@@ -6,11 +6,11 @@ export const v1 = {
 
 export const v3 = {
   PACKET_TYPE: {
-    CMD: 1,
-    STATUS_REQ: 2,
+    STATUS_REQ: 1,
+    CMD: 2,
     CMD_OUTPUT_REQ: 3,
-    CMD_ACK: 4,
-    STATUS: 5,
+    STATUS: 4,
+    CMD_ACK: 5,
     CMD_OUTPUT: 6,
     ERROR: 7
   }

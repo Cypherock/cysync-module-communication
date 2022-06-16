@@ -53,6 +53,7 @@ export const v3 = {
   packetType: 8,
   commandType: 32,
   payloadLength: 8,
+  timestampLength: 32,
   dataSize: 16,
   crc: 16
 };

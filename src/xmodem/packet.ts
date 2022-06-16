@@ -6,7 +6,6 @@ import { PacketVersion, PacketVersionMap } from '../utils/versions';
 
 export interface DecodedPacketData {
   startOfFrame: string;
-  commandType: number;
   currentPacketNumber: number;
   totalPacketNumber: number;
   protobufDataSize: number;
@@ -17,17 +16,16 @@ export interface DecodedPacketData {
   sequenceNumber: number;
   packetType: number;
   errorList: string[];
+  timestamp: number;
 }
 
 export const encodePacket = ({
   data,
-  commandType,
   version,
   sequenceNumber,
   packetType
 }: {
   data: string;
-  commandType: number;
   version: PacketVersion;
   sequenceNumber: number;
   packetType: number;
@@ -52,6 +50,7 @@ export const encodePacket = ({
 
   const rounds = Math.ceil(data.length / CHUNK_SIZE);
   const packetList: string[] = [];
+
   for (let i = 1; i <= rounds; i += 1) {
     const currentPacketNumber = intToUintByte(
       i,
@@ -63,10 +62,6 @@ export const encodePacket = ({
       (i - 1) * CHUNK_SIZE + CHUNK_SIZE
     );
 
-    const serializedCommandType = intToUintByte(
-      commandType,
-      usableRadix.commandType
-    );
     const protobufData = '';
     const serializedRawDataLength = intToUintByte(
       dataChunk.length / 2,
@@ -76,12 +71,7 @@ export const encodePacket = ({
       protobufData.length / 2,
       usableRadix.dataSize
     );
-    const serializedTotalDataLength = intToUintByte(
-      (protobufData.length + dataChunk.length) / 2,
-      usableRadix.dataSize
-    );
     const payload =
-      serializedCommandType +
       serializedProtobufDataLength +
       serializedRawDataLength +
       protobufData +
@@ -90,12 +80,20 @@ export const encodePacket = ({
       payload.length / 2,
       usableRadix.payloadLength
     );
+    const serializedTimestamp = intToUintByte(
+      new Date()
+        .getTime()
+        .toString()
+        .slice(0, usableRadix.timestampLength / 4),
+      usableRadix.timestampLength
+    );
     const commData =
       serializedSequenceNumber +
-      serializedTotalDataLength +
+      payloadLength +
       currentPacketNumber +
       totalPacketNumber +
       serializedPacketType +
+      serializedTimestamp +
       payload;
     const crc = intToUintByte(
       crc16(Buffer.from(commData, 'hex')),
@@ -109,6 +107,7 @@ export const encodePacket = ({
       serializedSequenceNumber +
       serializedPacketType +
       payloadLength +
+      serializedTimestamp +
       payload;
 
     packetList.push(packet);
@@ -177,19 +176,16 @@ export const decodedPacket = (
     );
     offset += usableRadix.payloadLength / 4;
 
+    const timestamp = parseInt(
+      `0x${data.slice(offset, offset + usableRadix.timestampLength / 4)}`,
+      16
+    );
+    offset += usableRadix.timestampLength / 4;
+
     const payload = data.slice(offset, offset + payloadLength * 2);
     offset += payloadLength * 2;
 
     let payloadOffset = 0;
-    const commandType = parseInt(
-      `0x${payload.slice(
-        payloadOffset,
-        payloadOffset + usableRadix.commandType / 4
-      )}`,
-      16
-    );
-    payloadOffset += usableRadix.commandType / 4;
-
     const protobufDataSize = parseInt(
       `0x${payload.slice(
         payloadOffset,
@@ -224,10 +220,11 @@ export const decodedPacket = (
 
     const commData =
       intToUintByte(sequenceNumber, usableRadix.sequenceNumber) +
-      intToUintByte(rawDataSize + protobufDataSize, usableRadix.dataSize) +
+      intToUintByte(payloadLength, usableRadix.payloadLength) +
       intToUintByte(currentPacketNumber, usableRadix.currentPacketNumber) +
       intToUintByte(totalPacketNumber, usableRadix.totalPacket) +
       intToUintByte(packetType, usableRadix.packetType) +
+      intToUintByte(timestamp, usableRadix.timestampLength) +
       payload;
     const actualCRC = intToUintByte(
       crc16(Buffer.from(commData, 'hex')),
@@ -249,7 +246,6 @@ export const decodedPacket = (
     }
     packetList.push({
       startOfFrame,
-      commandType,
       currentPacketNumber: currentPacketNumber,
       totalPacketNumber: totalPacketNumber,
       crc: crc,
@@ -259,7 +255,8 @@ export const decodedPacket = (
       rawDataSize,
       errorList,
       sequenceNumber,
-      packetType
+      packetType,
+      timestamp
     });
   }
   return packetList;
@@ -271,15 +268,13 @@ export const decodedPacket = (
 //   return Math.floor(Math.random() * (max - min + 1)) + min;
 // }
 
-// for (let i = 0; i < 200; i += 1) {
-//   const data = crypto.randomBytes(randomNumber(0, 100000) * 2).toString('hex');
-//   const commandType = randomNumber(0, 100);
+// for (let i = 0; i < 2000; i += 1) {
+//   const data = crypto.randomBytes(randomNumber(0, 200000) * 2).toString('hex');
 //   const packetType = randomNumber(0, 8);
 //   const sequenceNumber = randomNumber(0, 100);
 
 //   const packetList = encodePacket({
 //     data,
-//     commandType,
 //     version: PacketVersionMap.v3,
 //     packetType,
 //     sequenceNumber
@@ -294,6 +289,7 @@ export const decodedPacket = (
 
 //   for (const decodedPacket of decodedPacketList) {
 //     if (decodedPacket.errorList.length > 0) {
+//       console.log(decodedPacket);
 //       throw new Error('Error in decoding packet');
 //     }
 //     totalData[decodedPacket.currentPacketNumber] = decodedPacket.rawData;

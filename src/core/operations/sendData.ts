@@ -9,7 +9,6 @@ import { DeviceConnectionInterface } from '../types';
 export const writePacket = ({
   connection,
   packet,
-  sequenceNumber,
   version,
   packetType
 }: {
@@ -146,7 +145,6 @@ export const sendData = async ({
 
   const packetsList = encodePacket({
     data,
-    commandType: commandType,
     version,
     sequenceNumber,
     packetType

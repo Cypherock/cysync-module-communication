@@ -91,8 +91,6 @@ export const getStatus = async ({
     packetType: usableCommands.PACKET_TYPE.STATUS_REQ
   });
 
-  console.log({ packetsList });
-
   if (packetsList.length === 0) {
     throw new Error('Cound not create packets');
   }
@@ -101,7 +99,7 @@ export const getStatus = async ({
     throw new Error('Status command has multiple packets');
   }
 
-  logger.info(`Sending command : containing ${packetsList.length} packets.`);
+  logger.info(`Getting status from device`);
 
   let firstError: Error | undefined;
 
@@ -150,5 +148,9 @@ export const getStatus = async ({
     throw firstError;
   }
 
-  return decodeStatus(finalData, version);
+  const status = decodeStatus(finalData, version);
+
+  logger.info('Got status from device', status);
+
+  return status;
 };

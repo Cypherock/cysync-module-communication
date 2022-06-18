@@ -32,7 +32,7 @@ export class DeviceConnection
 {
   public isListening: boolean = false;
 
-  private workingPacketVersion?: PacketVersion = PacketVersionMap.v3;
+  private workingPacketVersion?: PacketVersion;
   private testPacketVersion?: PacketVersion;
   private isTestingPacketVersion: boolean = false;
   private poolData: PacketData[] = [];
@@ -50,7 +50,6 @@ export class DeviceConnection
   private startListening() {
     this.isListening = true;
 
-    console.log({ msg: 'Adding listener' });
     this.connection.addListener('data', this.onData.bind(this));
     this.connection.addListener('close', this.onClose.bind(this));
     this.connection.addListener('error', this.onSerialPortError.bind(this));
@@ -60,7 +59,6 @@ export class DeviceConnection
    * Stop listening to all the events
    */
   private stopListening() {
-    console.log({ msg: 'Removing listener' });
     if (this.connection) {
       this.connection.removeListener('data', this.onData.bind(this));
       this.connection.removeListener('close', this.onClose.bind(this));
@@ -91,7 +89,6 @@ export class DeviceConnection
    *   - Process each packet individually
    */
   private async onData(packet: any) {
-    console.log({ packet });
     if (this.inBootloader) {
       this.broadcastRawPacket(packet);
       return;
@@ -254,12 +251,13 @@ export class DeviceConnection
   private checkPacketVersion(version: PacketVersion) {
     return new Promise<boolean>(async resolve => {
       try {
-        // TODO: Implement different method to verify working packet
-        // version for v3
-
         logger.debug(`Checking if packet version ${version} works`);
 
-        await legacyCommands.sendData(this, 41, '00', version, 3);
+        if (version === PacketVersionMap.v3) {
+          await operations.getStatus({ connection: this, version });
+        } else {
+          await legacyCommands.sendData(this, 41, '00', version, 3);
+        }
         resolve(true);
       } catch (error) {
         resolve(false);
@@ -435,7 +433,7 @@ export class DeviceConnection
     const resp = await operations.getCommandOutput({
       connection: this,
       sequenceNumber,
-      version: this.getPacketVersion(),
+      version: this.getPacketVersion()
     });
 
     if (!resp) {

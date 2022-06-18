@@ -92,16 +92,16 @@ export const getCommandOutput = async ({
 
   const usableCommands = commands.v3;
 
-  logger.info(`Sending command : containing packets.`);
+  logger.info(`Trying to receive output.`);
 
   let firstError: Error | undefined;
   const dataList: string[] = [];
 
   let totalPackets = 1;
-  let currentPacket = 0;
+  let currentPacket = 1;
   let isStatusResponse = false;
 
-  while (currentPacket < totalPackets) {
+  while (currentPacket <= totalPackets) {
     let tries = 1;
     let _maxTries = maxTries;
     firstError = undefined;
@@ -128,8 +128,8 @@ export const getCommandOutput = async ({
           version,
           sequenceNumber
         });
-        dataList[receivedPacket.currentPacketNumber] = receivedPacket.rawData;
-        console.log(receivedPacket);
+        dataList[receivedPacket.currentPacketNumber - 1] =
+          receivedPacket.rawData;
         totalPackets = receivedPacket.totalPacketNumber;
         currentPacket++;
         isSuccess = true;
@@ -166,9 +166,14 @@ export const getCommandOutput = async ({
 
   const finalData = dataList.join('');
 
+  let output: StatusData | RawData;
   if (isStatusResponse) {
-    return decodeStatus(finalData, version);
+    output = decodeStatus(finalData, version);
+  } else {
+    output = decodeRawData(finalData, version);
   }
 
-  return decodeRawData(finalData, version);
+  logger.info('Cmd Output received from device', output);
+
+  return output;
 };

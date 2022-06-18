@@ -48,7 +48,6 @@ export const waitForPacket = ({
     function dataListener(ePacket: Buffer) {
       try {
         const packetList = decodedPacket(ePacket, version);
-        console.log({ ePacket, packetList });
 
         let isSuccess = false;
         let receivedPacket: DecodedPacketData | undefined = undefined;

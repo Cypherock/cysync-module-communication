@@ -141,4 +141,6 @@ export const sendCommand = async ({
       throw firstError;
     }
   }
+
+  logger.info(`Sent command ${commandType} : ${data}`);
 };

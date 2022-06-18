@@ -1,4 +1,3 @@
-// import crypto from 'crypto';
 import { intToUintByte } from '../bytes';
 import { constants, radix } from '../config';
 import { crc16 } from '../core';
@@ -19,7 +18,7 @@ export interface DecodedPacketData {
   timestamp: number;
 }
 
-export enum CmdStatus {
+export enum CmdState {
   CMD_STATUS_NONE = 0,
   CMD_STATUS_RECEIVING = 1,
   CMD_STATUS_RECEIVED = 2,
@@ -28,19 +27,37 @@ export enum CmdStatus {
   CMD_STATUS_REJECTED = 5
 }
 
+export enum DeviceWaitOn {
+  IDLE = 1,
+  USB = 2,
+  DEVICE = 3,
+}
+
+export enum DeviceIdleState {
+  IDLE = 1,
+  BUSY_IP_CARD = 2,
+  BUSY_IP_KEY = 3,
+}
+
 export interface StatusData {
-  deviceState: number;
+  deviceState: string;
+  deviceWaitingOn: DeviceWaitOn;
+  deviceIdleState: DeviceIdleState;
   abortDisabled: boolean;
   cardTapDelta: number[];
   currentCmdSeq: number;
-  cmdState: number;
+  cmdState: CmdState;
   cmdType: number;
-  cmdStatus: CmdStatus;
+  cmdStatus: number;
+  isStatus?: boolean;
+  isRawData?: boolean;
 }
 
 export interface RawData {
   commandType: number;
   data: string;
+  isStatus?: boolean;
+  isRawData?: boolean;
 }
 
 export const encodePacket = ({
@@ -311,6 +328,10 @@ export const decodeStatus = (
   );
   offset += usableRadix.status.deviceState / 4;
 
+  const num = deviceState & 0xff;
+  const deviceIdleState = num & 0xf;
+  const deviceWaitingOn = num >> 4;
+
   const abortDisabled =
     parseInt(
       `0x${data.slice(offset, offset + usableRadix.status.abortDisabled / 4)}`,
@@ -353,16 +374,17 @@ export const decodeStatus = (
   );
   offset += usableRadix.status.cmdStatus / 4;
 
-  console.log({ offset, len: data.length });
-
   return {
-    deviceState,
+    deviceState: deviceState.toString(16),
+    deviceIdleState,
+    deviceWaitingOn,
     abortDisabled,
     cardTapDelta,
     currentCmdSeq,
     cmdState,
     cmdType,
-    cmdStatus
+    cmdStatus,
+    isStatus: true
   };
 };
 
@@ -401,62 +423,9 @@ export const decodeRawData = (
 
   const receivedData = params.slice(offset);
 
-  return { commandType: receivedCommandType, data: receivedData };
+  return {
+    commandType: receivedCommandType,
+    data: receivedData,
+    isRawData: true
+  };
 };
-
-// const data = decodeStatus('01000020C471002079170000000000000001', 'v3');
-// console.log(data);
-
-// function randomNumber(min: number, max: number) {
-//   min = Math.ceil(min);
-//   max = Math.floor(max);
-//   return Math.floor(Math.random() * (max - min + 1)) + min;
-// }
-
-// for (let i = 0; i < 2000; i += 1) {
-//   // const data = crypto.randomBytes(randomNumber(0, 200000) * 2).toString('hex');
-//   const packetType = randomNumber(0, 8);
-//   const sequenceNumber = randomNumber(0, 100);
-//   const data = '';
-
-//   const packetList = encodePacket({
-//     data,
-//     version: PacketVersionMap.v3,
-//     packetType,
-//     sequenceNumber
-//   });
-//   console.log({ i, totalPackets: packetList.length, dataLen: data.length / 2 });
-//   console.log({ packetList });
-
-//   let totalData: string[] = [];
-//   const decodedPacketList = decodedPacket(
-//     Buffer.from(packetList.join(''), 'hex'),
-//     PacketVersionMap.v3
-//   ) as any[];
-
-//   console.log({ decodedPacketList });
-//   for (const decodedPacket of decodedPacketList) {
-//     if (decodedPacket.errorList.length > 0) {
-//       console.log(decodedPacket);
-//       throw new Error('Error in decoding packet');
-//     }
-//     totalData[decodedPacket.currentPacketNumber] = decodedPacket.rawData;
-
-//     if (decodedPacket.sequenceNumber !== sequenceNumber) {
-//       console.log(decodedPacket);
-//       throw new Error('Invalid sequenceNumber');
-//     }
-
-//     if (decodedPacket.packetType !== packetType) {
-//       console.log(decodedPacket);
-//       throw new Error('Invalid packetType');
-//     }
-//   }
-
-//   const totalDataStr = totalData.join('');
-//   if (totalDataStr.toUpperCase() !== data.toUpperCase()) {
-//     console.log(data);
-//     console.log(totalData);
-//     throw new Error('Invalid decoded data');
-//   }
-// }

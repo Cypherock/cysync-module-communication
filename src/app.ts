@@ -7,6 +7,7 @@ export * from './errors';
 export { logLevel } from './utils';
 
 import { createPort } from './core/connection';
+import { StatusData, RawData } from './xmodem';
 
 export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -15,35 +16,23 @@ export function sleep(ms: number) {
 const run = async () => {
   const { connection } = await createPort();
   await connection.beforeOperation();
-  console.log({ msg: 'Sending status command' });
-  const status = await connection.getStatus();
-  console.log({ status });
+  await connection.selectPacketVersion();
+
   const sequenceNumber = connection.getNewSequenceNumber();
 
-  console.log({ msg: 'Sending command' });
-  await connection.sendCommand({
-    commandType: 87,
-    data: '00',
-    sequenceNumber
-  });
+  await connection.sendCommand({ commandType: 70, data: '01', sequenceNumber });
 
-  console.log({ msg: 'Sending status command 2' });
-  const status2 = await connection.getStatus();
-  console.log({ status2 });
+  let response: StatusData | RawData | undefined;
+  let isDone = false;
 
-  console.log({ msg: 'getting output' });
-  const output = await connection.getCommandOutput(sequenceNumber);
-  console.log({ output });
-
-  await sleep(2000);
-
-  console.log({ msg: 'Sending status command 3' });
-  const status3 = await connection.getStatus();
-  console.log({ status3 });
-
-  console.log({ msg: 'getting output 2' });
-  const output2 = await connection.getCommandOutput(sequenceNumber);
-  console.log({ output2 });
+  while (!isDone) {
+    response = await connection.getCommandOutput(sequenceNumber);
+    console.log({ response });
+    if (response.isRawData) {
+      isDone = true;
+    }
+    await sleep(200);
+  }
 };
 
 run();

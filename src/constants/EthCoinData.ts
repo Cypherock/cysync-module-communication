@@ -12,7 +12,7 @@ export class EthCoinData extends CoinData {
   public chain: number;
 
   constructor(coinData: IEthCoinDataOptions) {
-    super({ ...coinData, group:coinGroup.Ethereum, hasSegwit: false });
+    super({ ...coinData, group: coinGroup.Ethereum, hasSegwit: false });
 
     this.network = coinData.network;
     this.chain = coinData.chain;

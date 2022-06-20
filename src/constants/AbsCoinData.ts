@@ -42,7 +42,7 @@ export abstract class AbsCoinData {
     decimal,
     hasSegwit = false,
     isTest = false,
-    group = coinGroup.BitcoinForks,
+    group = coinGroup.BitcoinForks
   }: IAbsCoinDataOptions) {
     this.abbr = abbr;
     this.validatorCoinName = validatorCoinName;
@@ -60,5 +60,5 @@ export abstract class AbsCoinData {
 export enum coinGroup {
   BitcoinForks,
   Ethereum,
-  ERC20Tokens,
+  ERC20Tokens
 }

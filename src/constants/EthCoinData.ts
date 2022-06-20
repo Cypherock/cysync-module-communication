@@ -1,3 +1,4 @@
+import { coinGroup } from './AbsCoinData';
 import { CoinData, ICoinDataOptions } from './CoinData';
 
 export interface IEthCoinDataOptions extends ICoinDataOptions {
@@ -11,7 +12,7 @@ export class EthCoinData extends CoinData {
   public chain: number;
 
   constructor(coinData: IEthCoinDataOptions) {
-    super({ ...coinData, isEth: true, isErc20Token: false, hasSegwit: false });
+    super({ ...coinData, group: coinGroup.Ethereum, hasSegwit: false });
 
     this.network = coinData.network;
     this.chain = coinData.chain;

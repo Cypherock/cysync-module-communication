@@ -442,4 +442,26 @@ export class DeviceConnection
 
     return resp;
   }
+
+  public async waitForCommandOutput(params: {
+    sequenceNumber: operations.IWaitForCommandOutputParams['sequenceNumber'];
+    commandType: operations.IWaitForCommandOutputParams['commandType'];
+    onStatus: operations.IWaitForCommandOutputParams['onStatus'];
+    maxTries?: operations.IWaitForCommandOutputParams['maxTries'];
+    options?: operations.IWaitForCommandOutputParams['options'];
+  }) {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    const resp = await operations.waitForCommandOutput({
+      connection: this,
+      version,
+      ...params
+    });
+
+    return resp;
+  }
 }

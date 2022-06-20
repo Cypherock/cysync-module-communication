@@ -99,8 +99,6 @@ export const getStatus = async ({
     throw new Error('Status command has multiple packets');
   }
 
-  logger.info(`Getting status from device`);
-
   let firstError: Error | undefined;
 
   let tries = 1;
@@ -118,7 +116,7 @@ export const getStatus = async ({
         version,
         sequenceNumber: -1
       });
-      finalData = receivedPacket.rawData;
+      finalData = receivedPacket.payloadData;
       isSuccess = true;
     } catch (e) {
       // Don't retry if connection closed
@@ -149,8 +147,6 @@ export const getStatus = async ({
   }
 
   const status = decodeStatus(finalData, version);
-
-  logger.info('Got status from device', status);
 
   return status;
 };

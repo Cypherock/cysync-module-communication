@@ -54,19 +54,21 @@ export const waitForPacket = ({
         let error: Error | undefined;
 
         for (const packet of packetList) {
-          if (packet.packetType === usableCommands.PACKET_TYPE.ERROR) {
-            error = new DeviceError(DeviceErrorType.WRITE_REJECTED);
-          } else if (packetTypes.includes(packet.packetType)) {
-            if (
-              sequenceNumber === packet.sequenceNumber ||
-              packet.packetType === usableCommands.PACKET_TYPE.STATUS
-            ) {
-              isSuccess = true;
-              receivedPacket = packet;
+          if (packet.errorList.length === 0) {
+            if (packet.packetType === usableCommands.PACKET_TYPE.ERROR) {
+              error = new DeviceError(DeviceErrorType.WRITE_REJECTED);
+            } else if (packetTypes.includes(packet.packetType)) {
+              if (
+                sequenceNumber === packet.sequenceNumber ||
+                packet.packetType === usableCommands.PACKET_TYPE.STATUS
+              ) {
+                isSuccess = true;
+                receivedPacket = packet;
+              }
             }
-          }
 
-          if (error || isSuccess) break;
+            if (error || isSuccess) break;
+          }
         }
 
         if (error || isSuccess) {

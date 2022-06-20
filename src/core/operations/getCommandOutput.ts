@@ -9,7 +9,8 @@ import {
   decodeRawData,
   DecodedPacketData,
   RawData,
-  StatusData
+  StatusData,
+  decodePayloadData
 } from '../../xmodem';
 import { waitForPacket } from './receiveCommand';
 
@@ -128,8 +129,10 @@ export const getCommandOutput = async ({
           version,
           sequenceNumber
         });
+        console.log(receivedPacket);
         dataList[receivedPacket.currentPacketNumber - 1] =
-          receivedPacket.rawData;
+          receivedPacket.payloadData;
+        console.log(dataList);
         totalPackets = receivedPacket.totalPacketNumber;
         currentPacket++;
         isSuccess = true;
@@ -166,11 +169,13 @@ export const getCommandOutput = async ({
 
   const finalData = dataList.join('');
 
+  const { rawData } = decodePayloadData(finalData, version);
+
   let output: StatusData | RawData;
   if (isStatusResponse) {
-    output = decodeStatus(finalData, version);
+    output = decodeStatus(rawData, version);
   } else {
-    output = decodeRawData(finalData, version);
+    output = decodeRawData(rawData, version);
   }
 
   logger.info('Cmd Output received from device', output);

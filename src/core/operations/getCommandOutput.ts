@@ -129,10 +129,8 @@ export const getCommandOutput = async ({
           version,
           sequenceNumber
         });
-        console.log(receivedPacket);
         dataList[receivedPacket.currentPacketNumber - 1] =
           receivedPacket.payloadData;
-        console.log(dataList);
         totalPackets = receivedPacket.totalPacketNumber;
         currentPacket++;
         isSuccess = true;

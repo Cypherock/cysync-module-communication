@@ -464,4 +464,20 @@ export class DeviceConnection
 
     return resp;
   }
+
+  public async sendAbort(sequenceNumber: number) {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    const resp = await operations.sendAbort({
+      connection: this,
+      version,
+      sequenceNumber
+    });
+
+    return resp;
+  }
 }

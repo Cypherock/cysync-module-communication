@@ -12,7 +12,8 @@ export const v3 = {
     STATUS: 4,
     CMD_ACK: 5,
     CMD_OUTPUT: 6,
-    ERROR: 7
+    ERROR: 7,
+    ABORT: 8
   }
 };
 

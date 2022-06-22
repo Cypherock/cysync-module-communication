@@ -94,15 +94,15 @@ export const NEARCOINS: Record<string, NearCoinData> = {
   near: new NearCoinData({
     abbr: 'near',
     name: 'Near',
-    curve:'ed25519',
+    curve: 'ed25519',
     validatorCoinName: 'near',
     validatorNetworkType: 'testnet',
     coinIndex: '8000018d',
     customCoinIndex: '80000007',
-    decimal: 8,
+    decimal: 24,
     fees: 'Gwei',
     isTest: true,
-    network: 'testnet',
+    network: 'testnet'
   })
 };
 

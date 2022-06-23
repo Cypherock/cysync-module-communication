@@ -6,7 +6,8 @@ import {
   encodePacket,
   decodeStatus,
   StatusData,
-  DecodedPacketData
+  DecodedPacketData,
+  decodePayloadData
 } from '../../xmodem';
 import { waitForPacket } from './receiveCommand';
 
@@ -146,7 +147,9 @@ export const getStatus = async ({
     throw firstError;
   }
 
-  const status = decodeStatus(finalData, version);
+  const { rawData } = decodePayloadData(finalData, version);
+
+  const status = decodeStatus(rawData, version);
 
   return status;
 };

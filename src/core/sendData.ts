@@ -140,7 +140,7 @@ export const sendData = async (
                 DeviceErrorType.CONNECTION_CLOSED,
                 DeviceErrorType.CONNECTION_NOT_OPEN,
                 DeviceErrorType.NOT_CONNECTED
-              ].includes(e.errorType)
+              ].includes(e.errorCode)
             ) {
               tries = _maxTries;
             }

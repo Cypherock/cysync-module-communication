@@ -12,17 +12,38 @@ export enum DeviceErrorType {
   READ_TIMEOUT = 'HD_COM_1052',
 
   NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
-  UNKNOWN_ERROR = 'HD_COM_5500'
+  UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500'
 }
 
+const defaultErrorMessages = {
+  [DeviceErrorType.NOT_CONNECTED]: 'No device connected',
+
+  [DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW]: 'Device disconnected in flow',
+  [DeviceErrorType.CONNECTION_CLOSED]: 'Connection was closed while in process',
+  [DeviceErrorType.CONNECTION_NOT_OPEN]: 'Connection was not open',
+
+  [DeviceErrorType.WRITE_ERROR]: 'Unable to write packet to the device',
+
+  [DeviceErrorType.TIMEOUT_ERROR]: 'Timeout Error due to write/read',
+  [DeviceErrorType.WRITE_TIMEOUT]: 'Did not receive ACK of sent packet on time',
+  [DeviceErrorType.READ_TIMEOUT]:
+    'Did not receive the expected data from device on time',
+
+  [DeviceErrorType.NO_WORKING_PACKET_VERSION]: 'No working packet version',
+  [DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR]: 'Unknown Error at communication module'
+};
 
 export class DeviceError extends Error {
+  // remove below line
   public errorType: DeviceErrorType;
-  public errorCode: DeviceErrorType;
-  constructor(errorType: DeviceErrorType) {
+  public code: DeviceErrorType;
+  public message: string;
+  constructor(errorCode: DeviceErrorType) {
     super();
-    this.errorType = errorType;
-    this.errorCode = errorType || DeviceErrorType.UNKNOWN_ERROR;
+    this.code = errorCode || DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR;
+    // remove below line
+    this.errorType = errorCode || DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR;
+    this.message = defaultErrorMessages[this.errorType];
     Object.setPrototypeOf(this, DeviceError.prototype);
   }
 }

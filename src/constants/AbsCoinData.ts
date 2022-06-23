@@ -12,8 +12,7 @@ export interface IAbsCoinDataOptions {
 
   // Details about the type of coin
   isTest?: boolean;
-  isEth?: boolean;
-  isErc20Token?: boolean;
+  group?: CoinGroup;
   hasSegwit?: boolean;
 }
 
@@ -32,8 +31,7 @@ export abstract class AbsCoinData {
 
   // Details about the type of coin
   public isTest: boolean;
-  public isEth: boolean;
-  public isErc20Token: boolean;
+  public group: CoinGroup;
   public hasSegwit: boolean;
 
   constructor({
@@ -44,8 +42,7 @@ export abstract class AbsCoinData {
     decimal,
     hasSegwit = false,
     isTest = false,
-    isEth = false,
-    isErc20Token = false
+    group = CoinGroup.BitcoinForks
   }: IAbsCoinDataOptions) {
     this.abbr = abbr;
     this.validatorCoinName = validatorCoinName;
@@ -55,8 +52,13 @@ export abstract class AbsCoinData {
     this.multiplier = Math.pow(10, decimal);
 
     this.hasSegwit = hasSegwit;
-    this.isEth = isEth;
     this.isTest = isTest;
-    this.isErc20Token = isErc20Token;
+    this.group = group;
   }
+}
+
+export enum CoinGroup {
+  BitcoinForks,
+  Ethereum,
+  ERC20Tokens
 }

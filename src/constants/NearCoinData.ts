@@ -1,4 +1,4 @@
-import { coinGroup } from './AbsCoinData';
+import { CoinGroup } from './AbsCoinData';
 import { CoinData, ICoinDataOptions } from './CoinData';
 
 export interface INearCoinDataOptions extends ICoinDataOptions {
@@ -12,7 +12,7 @@ export class NearCoinData extends CoinData {
   public curve: string;
 
   constructor(coinData: INearCoinDataOptions) {
-    super({ ...coinData, group: coinGroup.Near, hasSegwit: false });
+    super({ ...coinData, group: CoinGroup.Near, hasSegwit: false });
 
     this.network = coinData.network;
     this.curve = coinData.curve;

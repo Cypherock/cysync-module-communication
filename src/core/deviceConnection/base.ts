@@ -110,6 +110,7 @@ export class BaseDeviceConnection extends EventEmitter {
   public write(data: string) {
     return new Promise<void>(async (resolve, reject) => {
       try {
+        console.log({ writePacket: data });
         this.connection.write(Buffer.from(data, 'hex'), error => {
           if (error) {
             return reject(error);

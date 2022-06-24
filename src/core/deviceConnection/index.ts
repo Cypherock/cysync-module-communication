@@ -206,6 +206,7 @@ export class DeviceConnection
    * Broadcast the raw packet to the listeners
    */
   private broadcastRawPacket(packet: any) {
+    console.log({ receivedPacket: packet });
     this.emit('data', packet);
   }
 

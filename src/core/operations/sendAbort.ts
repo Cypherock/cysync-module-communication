@@ -6,7 +6,8 @@ import {
   encodePacket,
   DecodedPacketData,
   decodeStatus,
-  StatusData
+  StatusData,
+  decodePayloadData
 } from '../../xmodem';
 import { waitForPacket } from './receiveCommand';
 
@@ -120,7 +121,11 @@ export const sendAbort = async ({
         sequenceNumber
       });
 
-      status = decodeStatus(receivedPacket.payloadData, version);
+      const { rawData } = decodePayloadData(
+        receivedPacket.payloadData,
+        version
+      );
+      status = decodeStatus(rawData, version);
 
       console.log(status);
       if (status.currentCmdSeq !== sequenceNumber) {

@@ -126,10 +126,10 @@ export const stmUpdateSendData = async (
           } else {
             return reject(errorMsg);
           }
-        } catch (e) {
-          if (!firstError) {
-            firstError = e as Error;
-          }
+        } catch (e: any) {
+          if (!firstError) firstError = e as Error;
+          // don't retry when connection is closed
+          if (e.errorType === DeviceErrorType.CONNECTION_CLOSED) tries = 5;
           logger.warn('Error in sending data', e);
         }
         tries++;

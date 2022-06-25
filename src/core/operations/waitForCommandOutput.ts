@@ -12,7 +12,8 @@ export function sleep(ms: number) {
 export interface IWaitForCommandOutputParams {
   connection: DeviceConnectionInterface;
   sequenceNumber: number;
-  commandType: number;
+  executingCommandTypes: number[];
+  expectedCommandTypes: number[];
   onStatus: (status: StatusData) => void;
   version: PacketVersion;
   maxTries?: number;
@@ -22,7 +23,8 @@ export interface IWaitForCommandOutputParams {
 export const waitForCommandOutput = async ({
   connection,
   sequenceNumber,
-  commandType,
+  executingCommandTypes,
+  expectedCommandTypes,
   onStatus,
   options,
   version,
@@ -42,13 +44,29 @@ export const waitForCommandOutput = async ({
       maxTries,
       sequenceNumber
     });
+
     if (response.isRawData) {
-      return response as RawData;
+      const resp = response as RawData;
+      if (
+        expectedCommandTypes.length > 0 &&
+        !expectedCommandTypes.includes(resp.commandType)
+      ) {
+        throw new Error(
+          `Invalid commandType. Expected commandTypes: ${expectedCommandTypes.join(
+            ','
+          )}`
+        );
+      }
+      return resp;
     }
 
     const status = response as StatusData;
 
-    if (isExecutingCurrentCommand && status.cmdType !== commandType) {
+    if (
+      isExecutingCurrentCommand &&
+      executingCommandTypes.length > 0 &&
+      !executingCommandTypes.includes(status.cmdType)
+    ) {
       throw new DeviceError(
         DeviceErrorType.EXECUTING_OTHER_COMMAND,
         `The device is executing some other command with command type ${status.cmdType}`
@@ -56,7 +74,11 @@ export const waitForCommandOutput = async ({
     }
 
     if (status.currentCmdSeq === sequenceNumber) {
-      if (!isExecutingCurrentCommand && status.cmdType === commandType) {
+      if (
+        !isExecutingCurrentCommand &&
+        executingCommandTypes.length > 0 &&
+        executingCommandTypes.includes(status.cmdType)
+      ) {
         isExecutingCurrentCommand = true;
       }
 

@@ -446,7 +446,8 @@ export class DeviceConnection
 
   public async waitForCommandOutput(params: {
     sequenceNumber: operations.IWaitForCommandOutputParams['sequenceNumber'];
-    commandType: operations.IWaitForCommandOutputParams['commandType'];
+    expectedCommandTypes: operations.IWaitForCommandOutputParams['expectedCommandTypes'];
+    executingCommandTypes: operations.IWaitForCommandOutputParams['executingCommandTypes'];
     onStatus: operations.IWaitForCommandOutputParams['onStatus'];
     maxTries?: operations.IWaitForCommandOutputParams['maxTries'];
     options?: operations.IWaitForCommandOutputParams['options'];

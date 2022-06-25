@@ -61,34 +61,6 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
   })
 };
 
-export const ETHCOINS: Record<string, EthCoinData> = {
-  eth: new EthCoinData({
-    abbr: 'eth',
-    name: 'Ethereum',
-    validatorCoinName: 'eth',
-    validatorNetworkType: 'prod',
-    coinIndex: '8000003c',
-    customCoinIndex: '80000005',
-    decimal: 18,
-    fees: 'Gwei',
-    network: 'main',
-    chain: 1
-  }),
-  ethr: new EthCoinData({
-    abbr: 'ethr',
-    name: 'Ethereum Ropsten',
-    validatorCoinName: 'eth',
-    validatorNetworkType: 'testnet',
-    coinIndex: '8000003c',
-    customCoinIndex: '80000006',
-    decimal: 18,
-    fees: 'Gwei',
-    isTest: true,
-    network: 'ropsten',
-    chain: 3
-  })
-};
-
 const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
 
 // This is the list of tokens that are supported by our PRICE API
@@ -169,7 +141,35 @@ for (const token of erc20List) {
   }
 }
 
-export const ERC20TOKENS = ERC20TOKENSLIST;
+export const ETHCOINS: Record<string, EthCoinData> = {
+  eth: new EthCoinData({
+    abbr: 'eth',
+    name: 'Ethereum',
+    validatorCoinName: 'eth',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '80000005',
+    decimal: 18,
+    fees: 'Gwei',
+    network: 'main',
+    chain: 1,
+    erc20TokensList: ERC20TOKENSLIST
+  }),
+  ethr: new EthCoinData({
+    abbr: 'ethr',
+    name: 'Ethereum Ropsten',
+    validatorCoinName: 'eth',
+    validatorNetworkType: 'testnet',
+    coinIndex: '8000003c',
+    customCoinIndex: '80000006',
+    decimal: 18,
+    fees: 'Gwei',
+    isTest: true,
+    network: 'ropsten',
+    chain: 3,
+    erc20TokensList: {}
+  })
+};
 
 export const COINS: Record<string, CoinData> = {
   ...BTCCOINS,
@@ -177,6 +177,5 @@ export const COINS: Record<string, CoinData> = {
 };
 
 export const ALLCOINS: Record<string, AbsCoinData> = {
-  ...COINS,
-  ...ERC20TOKENS
+  ...COINS
 };

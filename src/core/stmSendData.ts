@@ -8,23 +8,28 @@ const ACK_PACKET = '06';
 const ERROR_CODES = [
   {
     code: '07',
-    message: 'Limit exceeded'
+    message: 'Limit exceeded',
+    errorObj: DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED
   },
   {
     code: '08',
-    message: 'Wrong firmware version'
+    message: 'Wrong firmware version',
+    errorObj: DeviceErrorType.WRONG_FIRMWARE_VERSION
   },
   {
     code: '09',
-    message: 'Wrong hardware version'
+    message: 'Wrong hardware version',
+    errorObj: DeviceErrorType.WRONG_HARDWARE_VERSION
   },
   {
     code: '0a',
-    message: 'Wrong magic number'
+    message: 'Wrong magic number',
+    errorObj: DeviceErrorType.WRONG_MAGIC_NUMBER
   },
   {
     code: '0b',
-    message: 'Signature not verified'
+    message: 'Signature not verified',
+    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
   }
 ];
 
@@ -36,7 +41,7 @@ const writePacket = (
   connection: DeviceConnectionInterface,
   packet: any,
   options?: { timeout?: number }
-): Promise<string | undefined> => {
+): Promise<DeviceError | undefined> => {
   return new Promise((resolve, reject) => {
     /**
      * Ensure is listener is activated first before writing
@@ -51,9 +56,9 @@ const writePacket = (
       const ePacketData = ePacket.toString('hex');
 
       // When a error code is received, return the error
-      for (const errorCode of ERROR_CODES) {
-        if (ePacketData.includes(errorCode.code)) {
-          resolve(errorCode.message);
+      for (const error of ERROR_CODES) {
+        if (ePacketData.includes(error.code)) {
+          resolve(new DeviceError(error.errorObj));
           connection.removeListener('data', eListener);
           connection.removeListener('close', onClose);
           return;

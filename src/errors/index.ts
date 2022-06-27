@@ -11,6 +11,13 @@ export enum DeviceErrorType {
   WRITE_TIMEOUT = 'HD_COM_1051',
   READ_TIMEOUT = 'HD_COM_1052',
 
+  FIRMWARE_SIZE_LIMIT_EXCEEDED = 'HD_FIRM_1001',
+  WRONG_FIRMWARE_VERSION = 'HD_FIRM_1002',
+  WRONG_HARDWARE_VERSION = 'HD_FIRM_1003',
+  WRONG_MAGIC_NUMBER = 'HD_FIRM_1004',
+  SIGNATURE_NOT_VERIFIED = 'HD_FIRM_1005',
+  LOWER_FIRMWARE_VERSION = 'HD_FIRM_1006',
+
   NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
   UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500'
 }
@@ -29,8 +36,16 @@ const defaultErrorMessages = {
   [DeviceErrorType.READ_TIMEOUT]:
     'Did not receive the expected data from device on time',
 
+  [DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED]: 'Firmware Size Limit Exceed',
+  [DeviceErrorType.WRONG_FIRMWARE_VERSION]: 'Wrong Firmware version',
+  [DeviceErrorType.WRONG_HARDWARE_VERSION]: 'Wrong Hardware version',
+  [DeviceErrorType.WRONG_MAGIC_NUMBER]: 'Wrong Magic Number',
+  [DeviceErrorType.SIGNATURE_NOT_VERIFIED]: 'Signature not verified',
+  [DeviceErrorType.LOWER_FIRMWARE_VERSION]: 'Lower Firmware version',
+
   [DeviceErrorType.NO_WORKING_PACKET_VERSION]: 'No working packet version',
-  [DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR]: 'Unknown Error at communication module'
+  [DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR]:
+    'Unknown Error at communication module'
 };
 
 export class DeviceError extends Error {

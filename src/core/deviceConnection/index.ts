@@ -234,7 +234,7 @@ export class DeviceConnection
       try {
         logger.debug(`Checking if packet version ${version} works`);
 
-        await sendData(this, 41, '00', version, 3);
+        await sendData(this, 41, '00', version);
         resolve(true);
       } catch (error) {
         resolve(false);
@@ -328,8 +328,8 @@ export class DeviceConnection
   /**
    * Sends the data with the specific command type to the device
    */
-  public async sendData(command: number, data: string, maxTries?: number) {
-    return sendData(this, command, data, this.getPacketVersion(), maxTries);
+  public async sendData(command: number, data: string) {
+    return sendData(this, command, data, this.getPacketVersion());
   }
 
   /**

@@ -22,30 +22,76 @@ export enum DeviceErrorType {
   UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500'
 }
 
-const defaultErrorMessages = {
-  [DeviceErrorType.NOT_CONNECTED]: 'No device connected',
+const errorObjects = {
+  [DeviceErrorType.NOT_CONNECTED]: {
+    message: 'No device connected',
+    doRetry: false
+  },
 
-  [DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW]: 'Device disconnected in flow',
-  [DeviceErrorType.CONNECTION_CLOSED]: 'Connection was closed while in process',
-  [DeviceErrorType.CONNECTION_NOT_OPEN]: 'Connection was not open',
+  [DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW]: {
+    message: 'Device disconnected in flow',
+    doRetry: false
+  },
+  [DeviceErrorType.CONNECTION_CLOSED]: {
+    message: 'Connection was closed while in process',
+    doRetry: false
+  },
+  [DeviceErrorType.CONNECTION_NOT_OPEN]: {
+    message: 'Connection was not open',
+    doRetry: false
+  },
 
-  [DeviceErrorType.WRITE_ERROR]: 'Unable to write packet to the device',
+  [DeviceErrorType.WRITE_ERROR]: {
+    message: 'Unable to write packet to the device',
+    doRetry: true
+  },
 
-  [DeviceErrorType.TIMEOUT_ERROR]: 'Timeout Error due to write/read',
-  [DeviceErrorType.WRITE_TIMEOUT]: 'Did not receive ACK of sent packet on time',
-  [DeviceErrorType.READ_TIMEOUT]:
-    'Did not receive the expected data from device on time',
+  [DeviceErrorType.TIMEOUT_ERROR]: {
+    message: 'Timeout Error due to write/read',
+    doRetry: true
+  },
+  [DeviceErrorType.WRITE_TIMEOUT]: {
+    message: 'Did not receive ACK of sent packet on time',
+    doRetry: true
+  },
+  [DeviceErrorType.READ_TIMEOUT]: {
+    message: 'Did not receive the expected data from device on time',
+    doRetry: true
+  },
 
-  [DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED]: 'Firmware Size Limit Exceed',
-  [DeviceErrorType.WRONG_FIRMWARE_VERSION]: 'Wrong Firmware version',
-  [DeviceErrorType.WRONG_HARDWARE_VERSION]: 'Wrong Hardware version',
-  [DeviceErrorType.WRONG_MAGIC_NUMBER]: 'Wrong Magic Number',
-  [DeviceErrorType.SIGNATURE_NOT_VERIFIED]: 'Signature not verified',
-  [DeviceErrorType.LOWER_FIRMWARE_VERSION]: 'Lower Firmware version',
+  [DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED]: {
+    message: 'Firmware Size Limit Exceed',
+    doRetry: false
+  },
+  [DeviceErrorType.WRONG_FIRMWARE_VERSION]: {
+    message: 'Wrong Firmware version',
+    doRetry: false
+  },
+  [DeviceErrorType.WRONG_HARDWARE_VERSION]: {
+    message: 'Wrong Hardware version',
+    doRetry: false
+  },
+  [DeviceErrorType.WRONG_MAGIC_NUMBER]: {
+    message: 'Wrong Magic Number',
+    doRetry: false
+  },
+  [DeviceErrorType.SIGNATURE_NOT_VERIFIED]: {
+    message: 'Signature not verified',
+    doRetry: false
+  },
+  [DeviceErrorType.LOWER_FIRMWARE_VERSION]: {
+    message: 'Lower Firmware version',
+    doRetry: false
+  },
 
-  [DeviceErrorType.NO_WORKING_PACKET_VERSION]: 'No working packet version',
-  [DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR]:
-    'Unknown Error at communication module'
+  [DeviceErrorType.NO_WORKING_PACKET_VERSION]: {
+    message: 'No working packet version',
+    doRetry: false
+  },
+  [DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR]: {
+    message: 'Unknown Error at communication module',
+    doRetry: true
+  }
 };
 
 export class DeviceError extends Error {
@@ -53,12 +99,14 @@ export class DeviceError extends Error {
   public errorType: DeviceErrorType;
   public code: DeviceErrorType;
   public message: string;
+  public doRetry: boolean;
   constructor(errorCode: DeviceErrorType) {
     super();
     this.code = errorCode || DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR;
     // remove below line
     this.errorType = errorCode || DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR;
-    this.message = defaultErrorMessages[this.errorType];
+    this.message = errorObjects[this.errorType].message;
+    this.doRetry = errorObjects[this.errorType].doRetry;
     Object.setPrototypeOf(this, DeviceError.prototype);
   }
 }

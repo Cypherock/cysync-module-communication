@@ -93,8 +93,6 @@ export const getCommandOutput = async ({
 
   const usableCommands = commands.v3;
 
-  logger.info(`Trying to receive output.`);
-
   let firstError: Error | undefined;
   const dataList: string[] = [];
 
@@ -175,8 +173,6 @@ export const getCommandOutput = async ({
   } else {
     output = decodeRawData(rawData, version);
   }
-
-  logger.info('Cmd Output received from device', output);
 
   return output;
 };

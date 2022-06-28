@@ -81,7 +81,6 @@ export const sendAbort = async ({
   sequenceNumber: number;
   maxTries?: number;
 }): Promise<StatusData> => {
-  console.log({ sequenceNumber });
   if (version !== PacketVersionMap.v3) {
     throw new Error('Only v3 packets are supported');
   }
@@ -127,7 +126,6 @@ export const sendAbort = async ({
       );
       status = decodeStatus(rawData, version);
 
-      console.log(status);
       if (status.currentCmdSeq !== sequenceNumber) {
         throw new Error('');
       }

@@ -83,6 +83,8 @@ export const getStatus = async ({
     throw new Error('Only v3 packets are supported');
   }
 
+  logger.info('Getting status');
+
   const usableCommands = commands.v3;
 
   const packetsList = encodePacket({
@@ -150,6 +152,8 @@ export const getStatus = async ({
   const { rawData } = decodePayloadData(finalData, version);
 
   const status = decodeStatus(rawData, version);
+
+  logger.info(status);
 
   return status;
 };

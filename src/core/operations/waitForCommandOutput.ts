@@ -1,9 +1,10 @@
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { RawData, StatusData, CmdState } from '../../xmodem';
+import { RawData, StatusData, DeviceIdleState, CmdState } from '../../xmodem';
 
 import { DeviceConnectionInterface } from '../types';
 import { getCommandOutput } from './getCommandOutput';
+import logger from '../../utils/logger';
 
 export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -12,7 +13,6 @@ export function sleep(ms: number) {
 export interface IWaitForCommandOutputParams {
   connection: DeviceConnectionInterface;
   sequenceNumber: number;
-  executingCommandTypes: number[];
   expectedCommandTypes: number[];
   onStatus: (status: StatusData) => void;
   version: PacketVersion;
@@ -23,7 +23,6 @@ export interface IWaitForCommandOutputParams {
 export const waitForCommandOutput = async ({
   connection,
   sequenceNumber,
-  executingCommandTypes,
   expectedCommandTypes,
   onStatus,
   options,
@@ -34,8 +33,12 @@ export const waitForCommandOutput = async ({
     throw new Error('Only v3 packets are supported');
   }
 
-  let isExecutingCurrentCommand = false;
-  // const startTime = new Date();
+  logger.info(
+    `Trying to receive output with command ${expectedCommandTypes.join(' ')}`
+  );
+
+  let lastStatus = -1;
+  let lastState = -1;
 
   while (true) {
     const response = await getCommandOutput({
@@ -47,6 +50,8 @@ export const waitForCommandOutput = async ({
 
     if (response.isRawData) {
       const resp = response as RawData;
+      logger.info('Output received', response);
+
       if (
         expectedCommandTypes.length > 0 &&
         !expectedCommandTypes.includes(resp.commandType)
@@ -62,29 +67,32 @@ export const waitForCommandOutput = async ({
 
     const status = response as StatusData;
 
-    if (
-      isExecutingCurrentCommand &&
-      executingCommandTypes.length > 0 &&
-      !executingCommandTypes.includes(status.cmdType)
-    ) {
+    if (lastState !== status.cmdState || lastStatus !== status.cmdStatus) {
+      logger.info(status);
+    }
+
+    lastState = status.cmdState;
+    lastStatus = status.cmdStatus;
+
+    if (status.currentCmdSeq !== sequenceNumber) {
       throw new DeviceError(
         DeviceErrorType.EXECUTING_OTHER_COMMAND,
         `The device is executing some other command with command type ${status.cmdType}`
       );
     }
 
-    if (status.currentCmdSeq === sequenceNumber) {
-      if (
-        !isExecutingCurrentCommand &&
-        executingCommandTypes.length > 0 &&
-        executingCommandTypes.includes(status.cmdType)
-      ) {
-        isExecutingCurrentCommand = true;
-      }
+    if (
+      [CmdState.CMD_STATUS_DONE, CmdState.CMD_STATUS_REJECTED].includes(
+        status.cmdState
+      )
+    ) {
+      throw new Error(
+        'Command status is done or rejected, but no output is received'
+      );
+    }
 
-      if (status.cmdState === CmdState.CMD_STATUS_EXECUTING) {
-        onStatus(response as StatusData);
-      }
+    if (status.deviceIdleState === DeviceIdleState.USB) {
+      onStatus(response as StatusData);
     }
 
     await sleep(options?.interval || 200);

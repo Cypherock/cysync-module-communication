@@ -92,9 +92,7 @@ export const sendCommand = async ({
     packetType: usableCommands.PACKET_TYPE.CMD
   });
 
-  logger.info(
-    `Sending command ${commandType} : containing ${packetsList.length} packets.`
-  );
+  logger.info(`Sending command ${commandType} : ${data}`);
 
   let firstError: Error | undefined;
 
@@ -142,5 +140,7 @@ export const sendCommand = async ({
     }
   }
 
-  logger.info(`Sent command ${commandType} : ${data}`);
+  logger.info(
+    `Sent command ${commandType} : containing ${packetsList.length} packets.`
+  );
 };

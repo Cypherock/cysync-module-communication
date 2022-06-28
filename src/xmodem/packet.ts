@@ -27,14 +27,14 @@ export enum CmdState {
 
 export enum DeviceWaitOn {
   IDLE = 1,
-  USB = 2,
-  DEVICE = 3
+  BUSY_IP_CARD = 2,
+  BUSY_IP_KEY = 3
 }
 
 export enum DeviceIdleState {
   IDLE = 1,
-  BUSY_IP_CARD = 2,
-  BUSY_IP_KEY = 3
+  USB = 2,
+  DEVICE = 3
 }
 
 export interface StatusData {

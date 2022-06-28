@@ -206,7 +206,6 @@ export class DeviceConnection
    * Broadcast the raw packet to the listeners
    */
   private broadcastRawPacket(packet: any) {
-    console.log({ receivedPacket: packet });
     this.emit('data', packet);
   }
 
@@ -447,7 +446,6 @@ export class DeviceConnection
   public async waitForCommandOutput(params: {
     sequenceNumber: operations.IWaitForCommandOutputParams['sequenceNumber'];
     expectedCommandTypes: operations.IWaitForCommandOutputParams['expectedCommandTypes'];
-    executingCommandTypes: operations.IWaitForCommandOutputParams['executingCommandTypes'];
     onStatus: operations.IWaitForCommandOutputParams['onStatus'];
     maxTries?: operations.IWaitForCommandOutputParams['maxTries'];
     options?: operations.IWaitForCommandOutputParams['options'];

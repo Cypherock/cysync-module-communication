@@ -9,7 +9,7 @@ import {
   DecodedPacketData,
   decodePayloadData
 } from '../../xmodem';
-import { waitForPacket } from './receiveCommand';
+import { waitForPacket } from './waitForPacket';
 
 import { DeviceConnectionInterface } from '../types';
 

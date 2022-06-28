@@ -3,7 +3,7 @@ import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
 import { encodePacket, encodeRawData } from '../../xmodem';
-import { waitForPacket } from './receiveCommand';
+import { waitForPacket } from './waitForPacket';
 
 import { DeviceConnectionInterface } from '../types';
 

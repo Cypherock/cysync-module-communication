@@ -67,18 +67,15 @@ export const waitForCommandOutput = async ({
 
     const status = response as StatusData;
 
-    if (lastState !== status.cmdState || lastStatus !== status.cmdStatus) {
+    if (lastState !== status.cmdState || lastStatus !== status.flowStatus) {
       logger.info(status);
     }
 
     lastState = status.cmdState;
-    lastStatus = status.cmdStatus;
+    lastStatus = status.flowStatus;
 
     if (status.currentCmdSeq !== sequenceNumber) {
-      throw new DeviceError(
-        DeviceErrorType.EXECUTING_OTHER_COMMAND,
-        `The device is executing some other command with command type ${status.cmdType}`
-      );
+      throw new DeviceError(DeviceErrorType.EXECUTING_OTHER_COMMAND);
     }
 
     if (

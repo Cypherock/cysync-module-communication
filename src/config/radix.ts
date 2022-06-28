@@ -59,11 +59,9 @@ export const v3 = {
   status: {
     deviceState: 8,
     abortDisabled: 8,
-    cardTap: 16,
     currentCmdSeq: 16,
     cmdState: 8,
-    cmdType: 32,
-    cmdStatus: 8
+    flowStatus: 16
   }
 };
 

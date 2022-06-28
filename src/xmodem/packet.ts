@@ -42,11 +42,9 @@ export interface StatusData {
   deviceWaitingOn: DeviceWaitOn;
   deviceIdleState: DeviceIdleState;
   abortDisabled: boolean;
-  cardTapDelta: number[];
   currentCmdSeq: number;
   cmdState: CmdState;
-  cmdType: number;
-  cmdStatus: number;
+  flowStatus: number;
   isStatus?: boolean;
   isRawData?: boolean;
 }
@@ -143,7 +141,7 @@ export const encodePacket = ({
   return packetList;
 };
 
-export const decodedPacket = (
+export const decodePacket = (
   param: Buffer,
   version: PacketVersion
 ): DecodedPacketData[] => {
@@ -285,17 +283,6 @@ export const decodeStatus = (
     ) === 1;
   offset += usableRadix.status.abortDisabled / 4;
 
-  const cardTapDelta: number[] = [];
-  for (let i = 0; i < 4; i++) {
-    const cardTap = parseInt(
-      `0x${data.slice(offset, offset + usableRadix.status.cardTap / 4)}`,
-      16
-    );
-    offset += usableRadix.status.cardTap / 4;
-
-    cardTapDelta.push(cardTap);
-  }
-
   const currentCmdSeq = parseInt(
     `0x${data.slice(offset, offset + usableRadix.status.currentCmdSeq / 4)}`,
     16
@@ -308,30 +295,24 @@ export const decodeStatus = (
   );
   offset += usableRadix.status.cmdState / 4;
 
-  const cmdType = parseInt(
-    `0x${data.slice(offset, offset + usableRadix.status.cmdType / 4)}`,
+  const flowStatus = parseInt(
+    `0x${data.slice(offset, offset + usableRadix.status.flowStatus / 4)}`,
     16
   );
-  offset += usableRadix.status.cmdType / 4;
+  offset += usableRadix.status.flowStatus / 4;
 
-  const cmdStatus = parseInt(
-    `0x${data.slice(offset, offset + usableRadix.status.cmdStatus / 4)}`,
-    16
-  );
-  offset += usableRadix.status.cmdStatus / 4;
-
-  return {
+  const status = {
     deviceState: deviceState.toString(16),
     deviceIdleState,
     deviceWaitingOn,
     abortDisabled,
-    cardTapDelta,
     currentCmdSeq,
     cmdState,
-    cmdType,
-    cmdStatus,
+    flowStatus,
     isStatus: true
   };
+
+  return status;
 };
 
 export const encodeRawData = (

@@ -119,7 +119,7 @@ export const stmUpdateSendData = async (
   const dataList = packetsList.map((d: any, index: number) => {
     return async (resolve: any, reject: any) => {
       let tries = 1;
-      let _maxTries = 5;
+      const _maxTries = 5;
       let firstError: Error | undefined;
       while (tries <= _maxTries) {
         try {

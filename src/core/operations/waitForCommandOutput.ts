@@ -1,10 +1,10 @@
 import { DeviceError, DeviceErrorType } from '../../errors';
-import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { RawData, StatusData, DeviceIdleState, CmdState } from '../../xmodem';
-
-import { DeviceConnectionInterface } from '../types';
-import { getCommandOutput } from './getCommandOutput';
 import logger from '../../utils/logger';
+import { PacketVersion, PacketVersionMap } from '../../utils/versions';
+import { CmdState, DeviceIdleState, RawData, StatusData } from '../../xmodem';
+import { DeviceConnectionInterface } from '../types';
+
+import { getCommandOutput } from './getCommandOutput';
 
 export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));

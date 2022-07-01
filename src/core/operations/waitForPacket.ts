@@ -2,8 +2,7 @@ import { commands, constants } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { decodePacket, DecodedPacketData } from '../../xmodem';
-
+import { DecodedPacketData, decodePacket } from '../../xmodem';
 import { DeviceConnectionInterface } from '../types';
 
 export interface CancellablePromise<T> extends Promise<T> {
@@ -26,7 +25,7 @@ export const waitForPacket = ({
     throw new Error('Only v3 packets are supported');
   }
 
-  let usableConstants = constants.v3;
+  const usableConstants = constants.v3;
   const usableCommands = commands.v3;
 
   if (!connection.isConnected()) {
@@ -50,7 +49,7 @@ export const waitForPacket = ({
         const packetList = decodePacket(ePacket, version);
 
         let isSuccess = false;
-        let receivedPacket: DecodedPacketData | undefined = undefined;
+        let receivedPacket: DecodedPacketData | undefined;
         let error: Error | undefined;
 
         for (const packet of packetList) {

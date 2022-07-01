@@ -8,14 +8,14 @@ import {
   PacketVersionList,
   PacketVersionMap
 } from '../../utils/versions';
+import { RawData, StatusData } from '../../xmodem';
 import {
   createAckPacket,
   LegacyDecodedPacketData,
   xmodemDecode
 } from '../../xmodem/legacy';
-import { StatusData, RawData } from '../../xmodem';
-import * as legacyCommands from '../operations/legacy';
 import * as operations from '../operations';
+import * as legacyCommands from '../operations/legacy';
 import {
   DeviceConnectionInterface,
   IConnectionInfo,

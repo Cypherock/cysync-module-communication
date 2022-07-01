@@ -89,7 +89,7 @@ export const encodePacket = ({
 
   let rounds = Math.ceil(serializedData.length / CHUNK_SIZE);
 
-  let hasNoData = serializedData.length === 0;
+  const hasNoData = serializedData.length === 0;
 
   if (hasNoData) {
     rounds = 1;
@@ -108,8 +108,8 @@ export const encodePacket = ({
       (i - 1) * CHUNK_SIZE + CHUNK_SIZE
     );
 
-    let payload = dataChunk;
-    let payloadLength = intToUintByte(
+    const payload = dataChunk;
+    const payloadLength = intToUintByte(
       dataChunk.length / 2,
       usableRadix.payloadLength
     );
@@ -241,9 +241,9 @@ export const decodePacket = (
     }
     packetList.push({
       startOfFrame,
-      currentPacketNumber: currentPacketNumber,
-      totalPacketNumber: totalPacketNumber,
-      crc: crc,
+      currentPacketNumber,
+      totalPacketNumber,
+      crc,
       payloadData,
       errorList,
       sequenceNumber,

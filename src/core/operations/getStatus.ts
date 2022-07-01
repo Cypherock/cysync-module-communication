@@ -3,15 +3,15 @@ import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
 import {
-  encodePacket,
-  decodeStatus,
-  StatusData,
   DecodedPacketData,
-  decodePayloadData
+  decodePayloadData,
+  decodeStatus,
+  encodePacket,
+  StatusData
 } from '../../xmodem';
-import { waitForPacket } from './waitForPacket';
-
 import { DeviceConnectionInterface } from '../types';
+
+import { waitForPacket } from './waitForPacket';
 
 const writeCommand = async ({
   connection,
@@ -105,7 +105,7 @@ export const getStatus = async ({
   let firstError: Error | undefined;
 
   let tries = 1;
-  let _maxTries = maxTries;
+  const _maxTries = maxTries;
   firstError = undefined;
   let isSuccess = false;
   let finalData = '';

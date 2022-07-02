@@ -1,10 +1,9 @@
-import { commands, constants } from '../config';
-import { DeviceError, DeviceErrorType } from '../errors';
-import { logger } from '../utils';
-import { PacketVersion, PacketVersionMap } from '../utils/versions';
-import { xmodemEncode } from '../xmodem';
-
-import { DeviceConnectionInterface, PacketData } from './types';
+import { commands, constants } from '../../../config';
+import { DeviceError, DeviceErrorType } from '../../../errors';
+import { logger } from '../../../utils';
+import { PacketVersion, PacketVersionMap } from '../../../utils/versions';
+import { xmodemEncode } from '../../../xmodem/legacy';
+import { DeviceConnectionInterface, PacketData } from '../../types';
 
 /**
  * Writes the packet to the SerialPort on the given connection,

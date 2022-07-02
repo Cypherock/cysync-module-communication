@@ -46,4 +46,23 @@ export const v2 = {
   }
 };
 
+export const v3 = {
+  currentPacketNumber: 16,
+  totalPacket: 16,
+  sequenceNumber: 16,
+  packetType: 8,
+  commandType: 32,
+  payloadLength: 8,
+  timestampLength: 32,
+  dataSize: 16,
+  crc: 16,
+  status: {
+    deviceState: 8,
+    abortDisabled: 8,
+    currentCmdSeq: 16,
+    cmdState: 8,
+    flowStatus: 16
+  }
+};
+
 export default v1;

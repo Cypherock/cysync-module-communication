@@ -367,8 +367,11 @@ export class DeviceConnection
    * Use only when the device is in bootloader mode.
    * Sends the data with the specific command type to the device.
    */
-  public async sendStmData(data: string) {
-    return legacyCommands.stmUpdateSendData(this, data);
+  public async sendStmData(
+    data: string,
+    onProgress: (progress: number) => void
+  ) {
+    return legacyCommands.stmUpdateSendData(this, data, onProgress);
   }
 
   /**

@@ -1,4 +1,3 @@
-// import crypto from 'crypto';
 import { intToUintByte } from '../bytes';
 import { constants, radix } from '../config';
 import { crc16 } from '../core';
@@ -428,56 +427,3 @@ export const encodePayloadData = (
     rawData
   );
 };
-
-// function randomNumber(min: number, max: number) {
-//   min = Math.ceil(min);
-//   max = Math.floor(max);
-//   return Math.floor(Math.random() * (max - min + 1)) + min;
-// }
-
-// for (let i = 0; i < 1; i += 1) {
-//   const data = crypto.randomBytes(randomNumber(0, 80) * 2).toString('hex');
-//   const packetType = randomNumber(0, 8);
-//   const sequenceNumber = randomNumber(0, 100);
-
-//   const packetList = encodePacket({
-//     data,
-//     version: PacketVersionMap.v3,
-//     packetType,
-//     sequenceNumber
-//   });
-//   console.log({ i, totalPackets: packetList.length, dataLen: data.length / 2 });
-
-//   let totalData: string[] = [];
-//   const decodedPacketList = decodedPacket(
-//     Buffer.from(packetList.join(''), 'hex'),
-//     PacketVersionMap.v3
-//   );
-
-//   for (const decodedPacket of decodedPacketList) {
-//     if (decodedPacket.errorList.length > 0) {
-//       console.log(decodedPacket);
-//       throw new Error('Error in decoding packet');
-//     }
-//     totalData[decodedPacket.currentPacketNumber] = decodedPacket.payloadData;
-
-//     if (decodedPacket.sequenceNumber !== sequenceNumber) {
-//       console.log(decodedPacket);
-//       throw new Error('Invalid sequenceNumber');
-//     }
-
-//     if (decodedPacket.packetType !== packetType) {
-//       console.log(decodedPacket);
-//       throw new Error('Invalid packetType');
-//     }
-//   }
-
-//   const totalDataStr = totalData.join('');
-//   const { rawData } = decodePayloadData(totalDataStr, 'v3');
-
-//   if (rawData.toUpperCase() !== data.toUpperCase()) {
-//     console.log(data);
-//     console.log(totalData);
-//     throw new Error('Invalid decoded data');
-//   }
-// }

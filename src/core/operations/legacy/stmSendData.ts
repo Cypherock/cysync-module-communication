@@ -1,8 +1,7 @@
-import { DeviceError, DeviceErrorType } from '../errors';
-import { logger } from '../utils';
-import { stmXmodemEncode } from '../xmodem';
-
-import { DeviceConnectionInterface } from './types';
+import { DeviceError, DeviceErrorType } from '../../../errors';
+import { logger } from '../../../utils';
+import { stmXmodemEncode } from '../../../xmodem/legacy';
+import { DeviceConnectionInterface } from '../../types';
 
 const ACK_PACKET = '06';
 const ERROR_CODES = [
@@ -94,6 +93,13 @@ const writePacket = (
       .write(packet)
       .then(() => {})
       .catch(err => {
+        connection.removeListener('data', eListener);
+        connection.removeListener('close', onClose);
+
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+
         reject(err);
       });
 
@@ -107,7 +113,8 @@ const writePacket = (
 
 export const stmUpdateSendData = async (
   connection: DeviceConnectionInterface,
-  data: string
+  data: string,
+  onProgress: (percent: number) => void
 ) => {
   const packetsList = stmXmodemEncode(data);
   /**
@@ -116,8 +123,9 @@ export const stmUpdateSendData = async (
   const dataList = packetsList.map((d: any, index: number) => {
     return async (resolve: any, reject: any) => {
       let tries = 1;
+      const _maxTries = 5;
       let firstError: Error | undefined;
-      while (tries <= 5) {
+      while (tries <= _maxTries) {
         try {
           const errorMsg = await writePacket(
             connection,
@@ -127,14 +135,27 @@ export const stmUpdateSendData = async (
             index === 0 ? { timeout: 10000 } : undefined
           );
           if (!errorMsg) {
+            onProgress((index * 100) / packetsList.length);
             return resolve(true);
           } else {
             return reject(errorMsg);
           }
-        } catch (e: any) {
-          if (!firstError) firstError = e as Error;
-          // don't retry when connection is closed
-          if (e.errorType === DeviceErrorType.CONNECTION_CLOSED) tries = 5;
+        } catch (e) {
+          if (e instanceof DeviceError) {
+            if (
+              [
+                DeviceErrorType.CONNECTION_CLOSED,
+                DeviceErrorType.CONNECTION_NOT_OPEN,
+                DeviceErrorType.NOT_CONNECTED
+              ].includes(e.errorType)
+            ) {
+              tries = _maxTries;
+            }
+          }
+
+          if (!firstError) {
+            firstError = e as Error;
+          }
           logger.warn('Error in sending data', e);
         }
         tries++;

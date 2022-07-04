@@ -19,7 +19,9 @@ export enum DeviceErrorType {
   LOWER_FIRMWARE_VERSION = 'HD_FIRM_1006',
 
   NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
-  UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500'
+  UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500',
+  WRITE_REJECTED = 'HD_COM_5001',
+  EXECUTING_OTHER_COMMAND = 'HD_COM_5002'
 }
 
 const errorObjects = {
@@ -91,6 +93,14 @@ const errorObjects = {
   [DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR]: {
     message: 'Unknown Error at communication module',
     doRetry: true
+  },
+  [DeviceErrorType.WRITE_REJECTED]: {
+    message: 'The write packet operation was rejected by the device',
+    doRetry: false
+  },
+  [DeviceErrorType.EXECUTING_OTHER_COMMAND]: {
+    message: 'The device is executing some other command',
+    doRetry: false
   }
 };
 

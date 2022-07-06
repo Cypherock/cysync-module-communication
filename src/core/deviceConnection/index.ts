@@ -254,9 +254,13 @@ export class DeviceConnection
         logger.debug(`Checking if packet version ${version} works`);
 
         if (version === PacketVersionMap.v3) {
-          await operations.getStatus({ connection: this, version });
+          await operations.getStatus({
+            connection: this,
+            version,
+            maxTries: 1
+          });
         } else {
-          await legacyCommands.sendData(this, 41, '00', version, 3);
+          await legacyCommands.sendData(this, 41, '00', version, 1);
         }
         resolve(true);
       } catch (error) {
@@ -280,13 +284,17 @@ export class DeviceConnection
 
         const versionList = [...PacketVersionList].reverse();
 
-        for (const packet of versionList) {
-          this.testPacketVersion = packet;
-          const isWorking = await this.checkPacketVersion(packet);
-          if (isWorking) {
-            workingPacketVersion = packet;
-            break;
+        // Trying all packet versions one by one for 5 times
+        for (let i = 0; i < 5; i++) {
+          for (const packet of versionList) {
+            this.testPacketVersion = packet;
+            const isWorking = await this.checkPacketVersion(packet);
+            if (isWorking) {
+              workingPacketVersion = packet;
+              break;
+            }
           }
+          if (workingPacketVersion) break;
         }
 
         resolve(workingPacketVersion);

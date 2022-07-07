@@ -282,7 +282,9 @@ export class DeviceConnection
 
         let workingPacketVersion: PacketVersion | undefined;
 
-        const versionList = [...PacketVersionList].reverse();
+        const versionList = [
+          ...PacketVersionList.filter(v => v !== PacketVersionMap.v1)
+        ];
 
         // Trying all packet versions one by one for 5 times
         for (let i = 0; i < 5; i++) {

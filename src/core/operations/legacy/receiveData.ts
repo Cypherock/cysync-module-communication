@@ -1,7 +1,6 @@
-import { DeviceError, DeviceErrorType } from '../errors';
-import { logger } from '../utils';
-
-import { DeviceConnectionInterface, PacketData } from './types';
+import { DeviceError, DeviceErrorType } from '../../../errors';
+import { logger } from '../../../utils';
+import { DeviceConnectionInterface, PacketData } from '../../types';
 
 const DEFAULT_RECEIVE_TIMEOUT = 15000;
 

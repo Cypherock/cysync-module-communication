@@ -14,4 +14,13 @@ export const v2 = {
   ACK_TIME: 2000
 };
 
+export const v3 = {
+  START_OF_FRAME: '55AA',
+  STUFFING_BYTE: 0x5a,
+  ACK_BYTE: '06',
+  CHUNK_SIZE: 48 * 2,
+  ACK_TIME: 2000,
+  CMD_RESPONSE_TIME: 2000
+};
+
 export default v1;

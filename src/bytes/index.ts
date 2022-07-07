@@ -9,6 +9,7 @@ const byteUnstuffing = (inputBuff: Buffer, version: PacketVersion): Buffer => {
   }
 
   if (inputBuff.length <= 0) throw new Error('Byte unstuffing failed: 0 size');
+
   const size = inputBuff.length;
   const outputData: any = [];
   for (let i = 0; i < size; i += 1) {
@@ -53,9 +54,24 @@ const byteStuffing = (inputBuff: Buffer, version: PacketVersion) => {
 };
 
 const intToUintByte = (ele: any, radix: number) => {
-  const val = Number(ele).toString(16);
+  let num = Number(ele);
+  if (Number.isNaN(num)) {
+    throw new Error('Invalid number');
+  }
+
+  if (num < 0) {
+    const maxNumber = parseInt(new Array(radix / 4).fill('f').join(''), 16);
+    num = maxNumber - Math.abs(num) + 1;
+  }
+
+  const val = num.toString(16);
   const noOfZeroes = radix / 4 - val.length;
   let res = '';
+  if (noOfZeroes < 0) {
+    throw new Error(
+      `Invalid serialization of data: ${ele} with radix ${radix}`
+    );
+  }
   for (let i = 0; i < noOfZeroes; i += 1) {
     res += '0';
   }

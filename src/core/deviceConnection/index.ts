@@ -3,11 +3,19 @@ import * as uuid from 'uuid';
 import { commands } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
-import { PacketVersion, PacketVersionList } from '../../utils/versions';
-import { createAckPacket, DecodedPacketData, xmodemDecode } from '../../xmodem';
-import { receiveCommand } from '../receiveData';
-import { sendData } from '../sendData';
-import { stmUpdateSendData } from '../stmSendData';
+import {
+  PacketVersion,
+  PacketVersionList,
+  PacketVersionMap
+} from '../../utils/versions';
+import { RawData, StatusData } from '../../xmodem';
+import {
+  createAckPacket,
+  LegacyDecodedPacketData,
+  xmodemDecode
+} from '../../xmodem/legacy';
+import * as operations from '../operations';
+import * as legacyCommands from '../operations/legacy';
 import {
   DeviceConnectionInterface,
   IConnectionInfo,
@@ -93,6 +101,17 @@ export class DeviceConnection
       pVersion = this.getPacketVersion();
     }
 
+    /**
+     * Packets are processed globally only for legacy
+     * packet versions: v1 and v2.
+     *
+     * Other packets are just broadcasted as it is
+     */
+    if (pVersion === PacketVersionMap.v3) {
+      this.broadcastRawPacket(packet);
+      return;
+    }
+
     const data = xmodemDecode(packet, pVersion);
 
     for (const p of data) {
@@ -120,7 +139,7 @@ export class DeviceConnection
    *     - Broadcast packet
    */
   private async processPacket(
-    packet: DecodedPacketData,
+    packet: LegacyDecodedPacketData,
     pVersion: PacketVersion
   ) {
     return new Promise<void>((resolve, reject) => {
@@ -234,7 +253,11 @@ export class DeviceConnection
       try {
         logger.debug(`Checking if packet version ${version} works`);
 
-        await sendData(this, 41, '00', version, 3);
+        if (version === PacketVersionMap.v3) {
+          await operations.getStatus({ connection: this, version });
+        } else {
+          await legacyCommands.sendData(this, 41, '00', version, 3);
+        }
         resolve(true);
       } catch (error) {
         resolve(false);
@@ -302,7 +325,7 @@ export class DeviceConnection
    * Checks if the packet is an info packet.
    * Info packets are: ACK, or NACK
    */
-  public isInfoPacket(packet: DecodedPacketData) {
+  public isInfoPacket(packet: LegacyDecodedPacketData) {
     return [
       this.usableCommands.ACK_PACKET,
       this.usableCommands.NACK_PACKET
@@ -326,27 +349,138 @@ export class DeviceConnection
   }
 
   /**
+   * @deprecated
    * Sends the data with the specific command type to the device
    */
   public async sendData(command: number, data: string, maxTries?: number) {
-    return sendData(this, command, data, this.getPacketVersion(), maxTries);
+    return legacyCommands.sendData(
+      this,
+      command,
+      data,
+      this.getPacketVersion(),
+      maxTries
+    );
   }
 
   /**
+   * @deprecated
    * Use only when the device is in bootloader mode.
    * Sends the data with the specific command type to the device.
    */
-  public async sendStmData(data: string) {
-    return stmUpdateSendData(this, data);
+  public async sendStmData(
+    data: string,
+    onProgress: (progress: number) => void
+  ) {
+    return legacyCommands.stmUpdateSendData(this, data, onProgress);
   }
 
   /**
+   * @deprecated
    * Receive a specific set of commands from the device.
    */
   public async receiveData(
     commandTypes: number[],
     timeout?: number
   ): Promise<{ commandType: number; data: string }> {
-    return receiveCommand(this, commandTypes, timeout);
+    return legacyCommands.receiveCommand(this, commandTypes, timeout);
+  }
+
+  public async sendCommand(params: {
+    commandType: number;
+    data: string;
+    sequenceNumber: number;
+  }): Promise<void> {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    await operations.sendCommand({
+      connection: this,
+      data: params.data,
+      commandType: params.commandType,
+      sequenceNumber: params.sequenceNumber,
+      version: this.getPacketVersion()
+    });
+  }
+
+  public async getStatus(): Promise<StatusData> {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    const resp = await operations.getStatus({
+      connection: this,
+      version: this.getPacketVersion()
+    });
+
+    if (!resp) {
+      throw new Error('Did not receive the expected data');
+    }
+
+    return resp;
+  }
+
+  public async getCommandOutput(
+    sequenceNumber: number
+  ): Promise<StatusData | RawData> {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    const resp = await operations.getCommandOutput({
+      connection: this,
+      sequenceNumber,
+      version: this.getPacketVersion()
+    });
+
+    if (!resp) {
+      throw new Error('Did not receive the expected data');
+    }
+
+    return resp;
+  }
+
+  public async waitForCommandOutput(params: {
+    sequenceNumber: operations.IWaitForCommandOutputParams['sequenceNumber'];
+    expectedCommandTypes: operations.IWaitForCommandOutputParams['expectedCommandTypes'];
+    onStatus: operations.IWaitForCommandOutputParams['onStatus'];
+    maxTries?: operations.IWaitForCommandOutputParams['maxTries'];
+    options?: operations.IWaitForCommandOutputParams['options'];
+  }) {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    const resp = await operations.waitForCommandOutput({
+      connection: this,
+      version,
+      ...params
+    });
+
+    return resp;
+  }
+
+  public async sendAbort(sequenceNumber: number) {
+    const version = this.getPacketVersion();
+
+    if (version !== PacketVersionMap.v3) {
+      throw new Error('Only v3 packets are supported');
+    }
+
+    const resp = await operations.sendAbort({
+      connection: this,
+      version,
+      sequenceNumber
+    });
+
+    return resp;
   }
 }

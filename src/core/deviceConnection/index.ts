@@ -259,8 +259,10 @@ export class DeviceConnection
             version,
             maxTries: 1
           });
+          await operations.getStatus({ connection: this, version });
         } else {
           await legacyCommands.sendData(this, 88, '00', version, 1);
+          await legacyCommands.sendData(this, 41, '00', version, 3);
         }
         resolve(true);
       } catch (error) {

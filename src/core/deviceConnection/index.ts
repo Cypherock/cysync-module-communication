@@ -254,13 +254,13 @@ export class DeviceConnection
         logger.debug(`Checking if packet version ${version} works`);
 
         if (version === PacketVersionMap.v3) {
-          await operations.getStatus({
+          await operations.getSDK({
             connection: this,
             version,
             maxTries: 1
           });
         } else {
-          await legacyCommands.sendData(this, 41, '00', version, 1);
+          await legacyCommands.sendData(this, 88, '00', version, 1);
         }
         resolve(true);
       } catch (error) {

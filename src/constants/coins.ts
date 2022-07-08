@@ -1,4 +1,3 @@
-import { AbsCoinData } from './AbsCoinData';
 import { BtcCoinData } from './BtcCoinData';
 import { CoinData } from './CoinData';
 import { Erc20CoinData } from './Erc20CoinData';
@@ -174,8 +173,4 @@ export const ETHCOINS: Record<string, EthCoinData> = {
 export const COINS: Record<string, CoinData> = {
   ...BTCCOINS,
   ...ETHCOINS
-};
-
-export const ALLCOINS: Record<string, AbsCoinData> = {
-  ...COINS
 };

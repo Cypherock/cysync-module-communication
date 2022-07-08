@@ -2,6 +2,7 @@ import { BtcCoinData } from './BtcCoinData';
 import { CoinData } from './CoinData';
 import { Erc20CoinData } from './Erc20CoinData';
 import erc20List from './erc20List.json';
+import erc20ListRopsten from './erc20ListRopsten.json';
 import { EthCoinData } from './EthCoinData';
 
 export const BTCCOINS: Record<string, BtcCoinData> = {
@@ -61,6 +62,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
 };
 
 const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
+const ERC20TOKENSLISTROPSTEN: Record<string, Erc20CoinData> = {};
 
 // This is the list of tokens that are supported by our PRICE API
 const supportedCoinList = [
@@ -140,6 +142,17 @@ for (const token of erc20List) {
   }
 }
 
+for (const token of erc20ListRopsten) {
+  ERC20TOKENSLISTROPSTEN[token.abbr.toLowerCase()] = new Erc20CoinData({
+    abbr: token.abbr.toLowerCase(),
+    address: token.address,
+    decimal: token.decimal,
+    name: token.name,
+    validatorCoinName: 'ethr',
+    validatorNetworkType: 'testnet'
+  });
+}
+
 export const ETHCOINS: Record<string, EthCoinData> = {
   eth: new EthCoinData({
     abbr: 'eth',
@@ -166,7 +179,7 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     isTest: true,
     network: 'ropsten',
     chain: 3,
-    erc20TokensList: {}
+    erc20TokensList: ERC20TOKENSLISTROPSTEN
   })
 };
 

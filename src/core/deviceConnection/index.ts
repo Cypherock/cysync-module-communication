@@ -226,7 +226,7 @@ export class DeviceConnection
    */
   public getPacketVersion() {
     if (!this.workingPacketVersion) {
-      throw new Error('No working packet version found.');
+      throw new DeviceError(DeviceErrorType.NO_WORKING_PACKET_VERSION);
     }
 
     return this.workingPacketVersion;

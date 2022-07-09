@@ -3,12 +3,9 @@ import * as uuid from 'uuid';
 import { commands } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
-import {
-  PacketVersion,
-  PacketVersionList,
-  PacketVersionMap
-} from '../../utils/versions';
-import { RawData, StatusData } from '../../xmodem';
+import { isSDKSupported, SDK_TO_PACKET_VERSION } from '../../utils/sdkVersions';
+import { PacketVersion, PacketVersionMap } from '../../utils/versions';
+import { formatSDKVersion, RawData, StatusData } from '../../xmodem';
 import {
   createAckPacket,
   LegacyDecodedPacketData,
@@ -33,8 +30,8 @@ export class DeviceConnection
   public isListening: boolean = false;
 
   private workingPacketVersion?: PacketVersion;
-  private testPacketVersion?: PacketVersion;
-  private isTestingPacketVersion: boolean = false;
+  private tempPacketVersion?: PacketVersion;
+  private useTempPacketVersion: boolean = false;
   private poolData: PacketData[] = [];
   private usableCommands = commands.v1;
 
@@ -95,8 +92,8 @@ export class DeviceConnection
     }
 
     let pVersion: PacketVersion;
-    if (this.isTestingPacketVersion) {
-      pVersion = this.getTestingPacketVersion();
+    if (this.useTempPacketVersion) {
+      pVersion = this.getTempPacketVersion();
     } else {
       pVersion = this.getPacketVersion();
     }
@@ -221,89 +218,57 @@ export class DeviceConnection
   }
 
   /**
+   * Gets the temp packet version.
+   * This is used when we are predicting the best packet version to
+   * communicate with the device.
+   */
+  private getTempPacketVersion() {
+    if (!this.tempPacketVersion) {
+      throw new Error('No test packet version found.');
+    }
+
+    return this.tempPacketVersion;
+  }
+
+  private async getSDKVersion() {
+    let retries = 0;
+    const maxTries = 2;
+    let firstError: Error = new Error('Could not get SDK version');
+    this.tempPacketVersion = PacketVersionMap.v1;
+    this.useTempPacketVersion = true;
+
+    while (retries < maxTries) {
+      try {
+        await legacyCommands.sendData(this, 88, '00', PacketVersionMap.v1, 2);
+
+        const sdkVersionData = await legacyCommands.receiveCommand(
+          this,
+          [88],
+          5000
+        );
+
+        const sdkVersion = formatSDKVersion(sdkVersionData.data);
+
+        this.tempPacketVersion = undefined;
+        this.useTempPacketVersion = false;
+
+        return sdkVersion;
+      } catch (error) {
+        retries++;
+        firstError = error as Error;
+      }
+    }
+
+    this.tempPacketVersion = undefined;
+    this.useTempPacketVersion = false;
+    throw firstError;
+  }
+
+  /**
    * Gets the best packet version that works with the device.
    * This returns the already predicted value from `selectPacketVersion`.
    */
   public getPacketVersion() {
-    if (!this.workingPacketVersion) {
-      throw new DeviceError(DeviceErrorType.NO_WORKING_PACKET_VERSION);
-    }
-
-    return this.workingPacketVersion;
-  }
-
-  /**
-   * Gets the test packet version.
-   * This is used when we are predicting the best packet version to
-   * communicate with the device.
-   */
-  private getTestingPacketVersion() {
-    if (!this.testPacketVersion) {
-      throw new Error('No test packet version found.');
-    }
-
-    return this.testPacketVersion;
-  }
-
-  /**
-   * Tests a particular packet version and returns if it works.
-   */
-  private checkPacketVersion(version: PacketVersion) {
-    return new Promise<boolean>(async resolve => {
-      try {
-        logger.debug(`Checking if packet version ${version} works`);
-
-        if (version === PacketVersionMap.v3) {
-          await operations.getStatus({ connection: this, version });
-        } else {
-          await legacyCommands.sendData(this, 41, '00', version, 3);
-        }
-        resolve(true);
-      } catch (error) {
-        resolve(false);
-      }
-    });
-  }
-
-  /**
-   * Tests all possible packet versions and returns the working one.
-   */
-  private getWorkingPacketVersion() {
-    return new Promise<PacketVersion | undefined>(async (resolve, reject) => {
-      this.isTestingPacketVersion = true;
-      try {
-        if (!this.isConnected()) {
-          throw new Error('Connection was destroyed');
-        }
-
-        let workingPacketVersion: PacketVersion | undefined;
-
-        const versionList = [...PacketVersionList].reverse();
-
-        for (const packet of versionList) {
-          this.testPacketVersion = packet;
-          const isWorking = await this.checkPacketVersion(packet);
-          if (isWorking) {
-            workingPacketVersion = packet;
-            break;
-          }
-        }
-
-        resolve(workingPacketVersion);
-      } catch (error) {
-        reject(error);
-      } finally {
-        this.testPacketVersion = undefined;
-        this.isTestingPacketVersion = false;
-      }
-    });
-  }
-
-  /**
-   * Computes the best possible packet version to communicate with the device.
-   */
-  public async selectPacketVersion() {
-    this.workingPacketVersion = await this.getWorkingPacketVersion();
     if (!this.workingPacketVersion) {
       throw new DeviceError(DeviceErrorType.NO_WORKING_PACKET_VERSION);
     }
@@ -389,6 +354,7 @@ export class DeviceConnection
     commandType: number;
     data: string;
     sequenceNumber: number;
+    maxTries?: number;
   }): Promise<void> {
     const version = this.getPacketVersion();
 
@@ -401,11 +367,12 @@ export class DeviceConnection
       data: params.data,
       commandType: params.commandType,
       sequenceNumber: params.sequenceNumber,
-      version: this.getPacketVersion()
+      version: this.getPacketVersion(),
+      maxTries: params.maxTries
     });
   }
 
-  public async getStatus(): Promise<StatusData> {
+  public async getStatus(params?: { maxTries?: number }): Promise<StatusData> {
     const version = this.getPacketVersion();
 
     if (version !== PacketVersionMap.v3) {
@@ -414,7 +381,8 @@ export class DeviceConnection
 
     const resp = await operations.getStatus({
       connection: this,
-      version: this.getPacketVersion()
+      version: this.getPacketVersion(),
+      maxTries: params?.maxTries
     });
 
     if (!resp) {
@@ -482,5 +450,17 @@ export class DeviceConnection
     });
 
     return resp;
+  }
+
+  public async isDeviceSupported() {
+    const sdkVersion = await this.getSDKVersion();
+
+    if (SDK_TO_PACKET_VERSION[sdkVersion]) {
+      this.workingPacketVersion = SDK_TO_PACKET_VERSION[sdkVersion];
+    }
+
+    const { isSupported, isNewer } = isSDKSupported(sdkVersion);
+
+    return { sdkVersion, isSupported, isNewer };
   }
 }

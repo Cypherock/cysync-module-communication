@@ -1,6 +1,6 @@
 {
   "name": "@cypherock/communication",
-  "version": "3.0.1-beta.18",
+  "version": "3.0.1-beta.19",
   "description": "Communication library for Cypherock X1 wallet",
   "main": "dist/app.js",
   "types": "dist/app.d.ts",
@@ -16,6 +16,7 @@
   "author": "Cypherock",
   "license": "AGPL-3.0",
   "dependencies": {
+    "compare-versions": "^4.1.3",
     "serialport": "10.0.0",
     "uuid": "^8.3.2",
     "winston": "^3.5.1"

@@ -3,9 +3,9 @@ import * as uuid from 'uuid';
 import { commands } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
+import { isSDKSupported, SDK_TO_PACKET_VERSION } from '../../utils/sdkVersions';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { SDK_TO_PACKET_VERSION, isSDKSupported } from '../../utils/sdkVersions';
-import { RawData, StatusData, formatSDKVersion } from '../../xmodem';
+import { formatSDKVersion, RawData, StatusData } from '../../xmodem';
 import {
   createAckPacket,
   LegacyDecodedPacketData,
@@ -232,7 +232,7 @@ export class DeviceConnection
 
   private async getSDKVersion() {
     let retries = 0;
-    let maxTries = 2;
+    const maxTries = 2;
     let firstError: Error = new Error('Could not get SDK version');
     this.tempPacketVersion = PacketVersionMap.v1;
     this.useTempPacketVersion = true;

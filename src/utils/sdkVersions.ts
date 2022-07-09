@@ -1,5 +1,6 @@
 import { compare } from 'compare-versions';
-import { PacketVersionMap, PacketVersion } from './versions';
+
+import { PacketVersion, PacketVersionMap } from './versions';
 
 // Supported version from order older to newer
 export const ALL_SUPPORTED_SDK_VERSIONS = ['1.0.0', '2.0.0'];

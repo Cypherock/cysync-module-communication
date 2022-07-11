@@ -47,6 +47,7 @@ const writeCommand = async ({
       .then(() => {})
       .catch(error => {
         logger.error(error);
+
         reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
         ackPromise.cancel();
         return;
@@ -127,7 +128,7 @@ export const sendAbort = async ({
       status = decodeStatus(rawData, version);
 
       if (status.currentCmdSeq !== sequenceNumber) {
-        throw new Error('');
+        throw new Error('Abort sequenceNumber does not match');
       }
 
       isSuccess = true;
@@ -150,7 +151,8 @@ export const sendAbort = async ({
         firstError = e as Error;
       }
 
-      logger.warn('Error in sending data', e);
+      logger.warn('Error in sending data for abort');
+      logger.warn(e);
     }
     tries++;
   }

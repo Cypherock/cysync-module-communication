@@ -436,7 +436,10 @@ export class DeviceConnection
     return resp;
   }
 
-  public async sendAbort(sequenceNumber: number) {
+  public async sendAbort(params: {
+    sequenceNumber: number;
+    maxTries?: number;
+  }) {
     const version = this.getPacketVersion();
 
     if (version !== PacketVersionMap.v3) {
@@ -446,7 +449,8 @@ export class DeviceConnection
     const resp = await operations.sendAbort({
       connection: this,
       version,
-      sequenceNumber
+      sequenceNumber: params.sequenceNumber,
+      maxTries: params.maxTries
     });
 
     return resp;

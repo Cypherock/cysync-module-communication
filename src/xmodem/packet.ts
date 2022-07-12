@@ -16,12 +16,13 @@ export interface DecodedPacketData {
 }
 
 export enum CmdState {
-  CMD_STATUS_NONE = 0,
-  CMD_STATUS_RECEIVING = 1,
-  CMD_STATUS_RECEIVED = 2,
-  CMD_STATUS_EXECUTING = 3,
-  CMD_STATUS_DONE = 4,
-  CMD_STATUS_REJECTED = 5
+  CMD_STATE_NONE = 0,
+  CMD_STATE_RECEIVING = 1,
+  CMD_STATE_RECEIVED = 2,
+  CMD_STATE_EXECUTING = 3,
+  CMD_STATE_DONE = 4,
+  CMD_STATE_FAILED = 5,
+  CMD_STATE_INVALID_CMD = 6
 }
 
 export enum DeviceWaitOn {

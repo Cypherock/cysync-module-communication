@@ -75,7 +75,7 @@ export const sendAbort = async ({
   connection,
   version,
   sequenceNumber,
-  maxTries = 5
+  maxTries = 2
 }: {
   connection: DeviceConnectionInterface;
   version: PacketVersion;

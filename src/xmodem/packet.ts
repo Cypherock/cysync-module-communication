@@ -56,6 +56,40 @@ export interface RawData {
   isRawData?: boolean;
 }
 
+export enum ErrorPacketRejectReason {
+  NO_ERROR = 0,
+  CHECKSUM_ERROR = 1,
+  BUSY_PREVIOUS_CMD = 2,
+  OUT_OF_ORDER_CHUNK = 3,
+  INVALID_CHUNK_COUNT = 4,
+  INVALID_SEQUENCE_NO = 5,
+  INVALID_PAYLOAD_LENGTH = 6,
+  APP_BUFFER_BLOCKED = 7,
+  NO_MORE_CHUNKS = 8,
+  INVALID_PACKET_TYPE = 9,
+  INVALID_CHUNK_NO = 10,
+  INCOMPLETE_PACKET = 11
+}
+
+export const RejectReasonToMsgMap: Record<
+  ErrorPacketRejectReason,
+  string | undefined
+> = {
+  [ErrorPacketRejectReason.NO_ERROR]: 'No error',
+  [ErrorPacketRejectReason.CHECKSUM_ERROR]: 'Checksum error',
+  [ErrorPacketRejectReason.BUSY_PREVIOUS_CMD]:
+    'Device is busy on previous command',
+  [ErrorPacketRejectReason.OUT_OF_ORDER_CHUNK]: 'Chunk out of order',
+  [ErrorPacketRejectReason.INVALID_CHUNK_COUNT]: 'Invalid chunk count',
+  [ErrorPacketRejectReason.INVALID_SEQUENCE_NO]: 'Invalid sequence number',
+  [ErrorPacketRejectReason.INVALID_PAYLOAD_LENGTH]: 'Invalid payload length',
+  [ErrorPacketRejectReason.APP_BUFFER_BLOCKED]: 'Application buffer blocked',
+  [ErrorPacketRejectReason.NO_MORE_CHUNKS]: 'No more chunks',
+  [ErrorPacketRejectReason.INVALID_PACKET_TYPE]: 'Invalid packet type',
+  [ErrorPacketRejectReason.INVALID_CHUNK_NO]: 'Invalid chunk number',
+  [ErrorPacketRejectReason.INCOMPLETE_PACKET]: 'Incomplete packet'
+};
+
 export const encodePacket = ({
   data,
   version,

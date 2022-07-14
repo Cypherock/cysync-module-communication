@@ -85,6 +85,7 @@ export class BaseDeviceConnection extends EventEmitter {
    */
   public close() {
     logger.info('Connection closed');
+    this.emit('close');
     return closeConnection(this.connection);
   }
 

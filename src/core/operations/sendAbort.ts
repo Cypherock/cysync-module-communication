@@ -47,8 +47,11 @@ const writeCommand = async ({
       .then(() => {})
       .catch(error => {
         logger.error(error);
-
-        reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
+        if (!connection.isConnected()) {
+          reject(new DeviceError(DeviceErrorType.CONNECTION_CLOSED));
+        } else {
+          reject(new DeviceError(DeviceErrorType.WRITE_ERROR));
+        }
         ackPromise.cancel();
         return;
       });

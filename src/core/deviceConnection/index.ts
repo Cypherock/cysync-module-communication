@@ -328,7 +328,6 @@ export class DeviceConnection
   }
 
   /**
-   * @deprecated
    * Use only when the device is in bootloader mode.
    * Sends the data with the specific command type to the device.
    */
@@ -336,7 +335,7 @@ export class DeviceConnection
     data: string,
     onProgress: (progress: number) => void
   ) {
-    return legacyCommands.stmUpdateSendData(this, data, onProgress);
+    return operations.stmUpdateSendData(this, data, onProgress);
   }
 
   /**
@@ -370,6 +369,10 @@ export class DeviceConnection
       version: this.getPacketVersion(),
       maxTries: params.maxTries
     });
+  }
+
+  public async sendBootloaderAbort() {
+    return operations.sendBootloaderAbort(this);
   }
 
   public async getStatus(params?: { maxTries?: number }): Promise<StatusData> {

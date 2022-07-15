@@ -129,7 +129,6 @@ const checkIfInReceivingMode = async (
 
     const eListener = (ePacket: any) => {
       const ePacketData = ePacket.toString('hex');
-      logger.info('Received data: ' + ePacketData);
 
       if (ePacketData.includes(RECEIVING_MODE_PACKET)) {
         resolve(undefined);

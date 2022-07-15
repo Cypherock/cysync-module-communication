@@ -24,7 +24,6 @@ const writePacket = (
 
     const eListener = (ePacket: any) => {
       const ePacketData = ePacket.toString('hex');
-      logger.info('Received data: ' + ePacketData);
 
       if (ePacketData.includes(ACK_PACKET)) {
         resolve(undefined);
@@ -51,7 +50,6 @@ const writePacket = (
     connection.addListener('data', eListener);
     connection.addListener('close', onClose);
 
-    logger.info('Writing data: ' + packet);
     connection
       .write(packet)
       .then(() => {})

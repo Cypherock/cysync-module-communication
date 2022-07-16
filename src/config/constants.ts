@@ -15,7 +15,7 @@ export const v2 = {
 };
 
 export const v3 = {
-  START_OF_FRAME: '55AA',
+  START_OF_FRAME: '5555',
   STUFFING_BYTE: 0x5a,
   ACK_BYTE: '06',
   CHUNK_SIZE: 48 * 2,

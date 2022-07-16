@@ -16,12 +16,13 @@ export interface DecodedPacketData {
 }
 
 export enum CmdState {
-  CMD_STATUS_NONE = 0,
-  CMD_STATUS_RECEIVING = 1,
-  CMD_STATUS_RECEIVED = 2,
-  CMD_STATUS_EXECUTING = 3,
-  CMD_STATUS_DONE = 4,
-  CMD_STATUS_REJECTED = 5
+  CMD_STATE_NONE = 0,
+  CMD_STATE_RECEIVING = 1,
+  CMD_STATE_RECEIVED = 2,
+  CMD_STATE_EXECUTING = 3,
+  CMD_STATE_DONE = 4,
+  CMD_STATE_FAILED = 5,
+  CMD_STATE_INVALID_CMD = 6
 }
 
 export enum DeviceWaitOn {
@@ -54,6 +55,40 @@ export interface RawData {
   isStatus?: boolean;
   isRawData?: boolean;
 }
+
+export enum ErrorPacketRejectReason {
+  NO_ERROR = 0,
+  CHECKSUM_ERROR = 1,
+  BUSY_PREVIOUS_CMD = 2,
+  OUT_OF_ORDER_CHUNK = 3,
+  INVALID_CHUNK_COUNT = 4,
+  INVALID_SEQUENCE_NO = 5,
+  INVALID_PAYLOAD_LENGTH = 6,
+  APP_BUFFER_BLOCKED = 7,
+  NO_MORE_CHUNKS = 8,
+  INVALID_PACKET_TYPE = 9,
+  INVALID_CHUNK_NO = 10,
+  INCOMPLETE_PACKET = 11
+}
+
+export const RejectReasonToMsgMap: Record<
+  ErrorPacketRejectReason,
+  string | undefined
+> = {
+  [ErrorPacketRejectReason.NO_ERROR]: 'No error',
+  [ErrorPacketRejectReason.CHECKSUM_ERROR]: 'Checksum error',
+  [ErrorPacketRejectReason.BUSY_PREVIOUS_CMD]:
+    'Device is busy on previous command',
+  [ErrorPacketRejectReason.OUT_OF_ORDER_CHUNK]: 'Chunk out of order',
+  [ErrorPacketRejectReason.INVALID_CHUNK_COUNT]: 'Invalid chunk count',
+  [ErrorPacketRejectReason.INVALID_SEQUENCE_NO]: 'Invalid sequence number',
+  [ErrorPacketRejectReason.INVALID_PAYLOAD_LENGTH]: 'Invalid payload length',
+  [ErrorPacketRejectReason.APP_BUFFER_BLOCKED]: 'Application buffer blocked',
+  [ErrorPacketRejectReason.NO_MORE_CHUNKS]: 'No more chunks',
+  [ErrorPacketRejectReason.INVALID_PACKET_TYPE]: 'Invalid packet type',
+  [ErrorPacketRejectReason.INVALID_CHUNK_NO]: 'Invalid chunk number',
+  [ErrorPacketRejectReason.INCOMPLETE_PACKET]: 'Incomplete packet'
+};
 
 export const encodePacket = ({
   data,
@@ -426,4 +461,16 @@ export const encodePayloadData = (
     protobufData +
     rawData
   );
+};
+
+export const formatSDKVersion = (version: string) => {
+  if (version.length < 12) {
+    throw new Error('SDK version should be atleast 6 bytes.');
+  }
+
+  const major = parseInt(version.slice(0, 4), 16);
+  const minor = parseInt(version.slice(4, 8), 16);
+  const patch = parseInt(version.slice(8, 12), 16);
+
+  return `${major}.${minor}.${patch}`;
 };

@@ -2,7 +2,13 @@ import { commands, constants } from '../../config';
 import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { DecodedPacketData, decodePacket } from '../../xmodem';
+import {
+  DecodedPacketData,
+  decodePacket,
+  decodePayloadData,
+  ErrorPacketRejectReason,
+  RejectReasonToMsgMap
+} from '../../xmodem';
 import { DeviceConnectionInterface } from '../types';
 
 export interface CancellablePromise<T> extends Promise<T> {
@@ -55,7 +61,28 @@ export const waitForPacket = ({
         for (const packet of packetList) {
           if (packet.errorList.length === 0) {
             if (packet.packetType === usableCommands.PACKET_TYPE.ERROR) {
+              logger.warn('Error packet', packet);
               error = new DeviceError(DeviceErrorType.WRITE_REJECTED);
+
+              const { rawData } = decodePayloadData(
+                packet.payloadData,
+                version
+              );
+
+              const rejectStatus = parseInt(`0x${rawData}`, 16);
+
+              let rejectReason: string;
+
+              const _rejectReason =
+                RejectReasonToMsgMap[rejectStatus as ErrorPacketRejectReason];
+
+              if (_rejectReason) {
+                rejectReason = _rejectReason;
+              } else {
+                rejectReason = `Unknown reject reason: ${rawData}`;
+              }
+
+              error.message = `The write packet operation was rejected by the device because: ${rejectReason}`;
             } else if (packetTypes.includes(packet.packetType)) {
               if (
                 sequenceNumber === packet.sequenceNumber ||
@@ -108,13 +135,21 @@ export const waitForPacket = ({
       reject(new DeviceError(DeviceErrorType.CONNECTION_CLOSED));
     }
 
+    if (!connection.isConnected()) {
+      throw new DeviceError(DeviceErrorType.CONNECTION_CLOSED);
+    }
+
     connection.addListener('data', dataListener);
     connection.addListener('close', onClose);
 
     timeout = setTimeout(() => {
       connection.removeListener('data', dataListener);
       connection.removeListener('close', onClose);
-      reject(new DeviceError(DeviceErrorType.READ_TIMEOUT));
+      if (!connection.isConnected()) {
+        reject(new DeviceError(DeviceErrorType.CONNECTION_CLOSED));
+      } else {
+        reject(new DeviceError(DeviceErrorType.READ_TIMEOUT));
+      }
     }, usableConstants.ACK_TIME);
 
     onCancel = () => {

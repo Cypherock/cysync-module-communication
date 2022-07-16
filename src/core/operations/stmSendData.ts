@@ -1,29 +1,36 @@
-import { DeviceError, DeviceErrorType } from '../../../errors';
-import { logger } from '../../../utils';
-import { stmXmodemEncode } from '../../../xmodem/legacy';
-import { DeviceConnectionInterface } from '../../types';
+import { DeviceError, DeviceErrorType } from '../../errors';
+import { logger } from '../../utils';
+import { stmXmodemEncode } from '../../xmodem/legacy';
+import { DeviceConnectionInterface } from '../types';
 
 const ACK_PACKET = '06';
+const RECEIVING_MODE_PACKET = '43';
+
 const ERROR_CODES = [
   {
     code: '07',
-    message: 'Limit exceeded'
+    message: 'Limit exceeded',
+    errorObj: DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED
   },
   {
     code: '08',
-    message: 'Wrong firmware version'
+    message: 'Wrong firmware version',
+    errorObj: DeviceErrorType.WRONG_FIRMWARE_VERSION
   },
   {
     code: '09',
-    message: 'Wrong hardware version'
+    message: 'Wrong hardware version',
+    errorObj: DeviceErrorType.WRONG_HARDWARE_VERSION
   },
   {
     code: '0a',
-    message: 'Wrong magic number'
+    message: 'Wrong magic number',
+    errorObj: DeviceErrorType.WRONG_MAGIC_NUMBER
   },
   {
     code: '0b',
-    message: 'Signature not verified'
+    message: 'Signature not verified',
+    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
   }
 ];
 
@@ -35,7 +42,7 @@ const writePacket = (
   connection: DeviceConnectionInterface,
   packet: any,
   options?: { timeout?: number }
-): Promise<string | undefined> => {
+): Promise<DeviceError | undefined> => {
   return new Promise((resolve, reject) => {
     /**
      * Ensure is listener is activated first before writing
@@ -50,9 +57,9 @@ const writePacket = (
       const ePacketData = ePacket.toString('hex');
 
       // When a error code is received, return the error
-      for (const errorCode of ERROR_CODES) {
-        if (ePacketData.includes(errorCode.code)) {
-          resolve(errorCode.message);
+      for (const error of ERROR_CODES) {
+        if (ePacketData.includes(error.code)) {
+          resolve(new DeviceError(error.errorObj));
           connection.removeListener('data', eListener);
           connection.removeListener('close', onClose);
           return;
@@ -106,12 +113,70 @@ const writePacket = (
   });
 };
 
+const checkIfInReceivingMode = async (
+  connection: DeviceConnectionInterface,
+  options?: { timeout?: number }
+) => {
+  return new Promise((resolve, reject) => {
+    /**
+     * Ensure is listener is activated first before writing
+     */
+    let timeout: NodeJS.Timeout;
+
+    if (!connection.isConnected()) {
+      throw new DeviceError(DeviceErrorType.CONNECTION_CLOSED);
+    }
+
+    const eListener = (ePacket: any) => {
+      const ePacketData = ePacket.toString('hex');
+
+      if (ePacketData.includes(RECEIVING_MODE_PACKET)) {
+        resolve(undefined);
+        connection.removeListener('data', eListener);
+        connection.removeListener('close', onClose);
+      }
+    };
+
+    function onClose(err: any) {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+
+      connection.removeListener('ack', eListener);
+      connection.removeListener('close', onClose);
+
+      if (err) {
+        logger.error(err);
+      }
+
+      reject(new DeviceError(DeviceErrorType.CONNECTION_CLOSED));
+    }
+
+    connection.addListener('data', eListener);
+    connection.addListener('close', onClose);
+
+    timeout = setTimeout(() => {
+      connection.removeListener('data', eListener);
+      connection.removeListener('close', onClose);
+      reject(new DeviceError(DeviceErrorType.NOT_IN_RECEIVING_MODE));
+    }, options?.timeout || 2000);
+  });
+};
+
 export const stmUpdateSendData = async (
   connection: DeviceConnectionInterface,
   data: string,
   onProgress: (percent: number) => void
 ) => {
   const packetsList = stmXmodemEncode(data);
+
+  try {
+    await checkIfInReceivingMode(connection);
+  } catch (error) {
+    logger.error(error);
+    throw error;
+  }
+
   /**
    * Create a list of each packet and self contained retries and listener
    */

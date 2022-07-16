@@ -39,6 +39,7 @@ export const waitForCommandOutput = async ({
 
   let lastStatus = -1;
   let lastState = -1;
+  let lastDeviceState = '';
 
   while (true) {
     const response = await getCommandOutput({
@@ -67,21 +68,28 @@ export const waitForCommandOutput = async ({
 
     const status = response as StatusData;
 
-    if (lastState !== status.cmdState || lastStatus !== status.flowStatus) {
+    if (
+      lastState !== status.cmdState ||
+      lastStatus !== status.flowStatus ||
+      lastDeviceState !== status.deviceState
+    ) {
       logger.info(status);
     }
 
     lastState = status.cmdState;
     lastStatus = status.flowStatus;
+    lastDeviceState = status.deviceState;
 
     if (status.currentCmdSeq !== sequenceNumber) {
       throw new DeviceError(DeviceErrorType.EXECUTING_OTHER_COMMAND);
     }
 
     if (
-      [CmdState.CMD_STATUS_DONE, CmdState.CMD_STATUS_REJECTED].includes(
-        status.cmdState
-      )
+      [
+        CmdState.CMD_STATE_DONE,
+        CmdState.CMD_STATE_FAILED,
+        CmdState.CMD_STATE_INVALID_CMD
+      ].includes(status.cmdState)
     ) {
       throw new Error(
         'Command status is done or rejected, but no output is received'

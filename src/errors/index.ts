@@ -1,43 +1,127 @@
 export enum DeviceErrorType {
-  NOT_CONNECTED,
-  CONNECTION_CLOSED,
-  CONNECTION_NOT_OPEN,
-  WRITE_ERROR,
-  WRITE_TIMEOUT,
-  READ_TIMEOUT,
-  WRITE_REJECTED,
-  NO_WORKING_PACKET_VERSION,
-  EXECUTING_OTHER_COMMAND
+  NOT_CONNECTED = 'HD_INIT_1001',
+
+  DEVICE_DISCONNECTED_IN_FLOW = 'HD_INIT_1010',
+  CONNECTION_CLOSED = 'HD_INIT_1011',
+  CONNECTION_NOT_OPEN = 'HD_INIT_1012',
+
+  WRITE_ERROR = 'HD_COM_1007',
+
+  TIMEOUT_ERROR = 'HD_COM_1050',
+  WRITE_TIMEOUT = 'HD_COM_1051',
+  READ_TIMEOUT = 'HD_COM_1052',
+
+  FIRMWARE_SIZE_LIMIT_EXCEEDED = 'HD_FIRM_1001',
+  WRONG_FIRMWARE_VERSION = 'HD_FIRM_1002',
+  WRONG_HARDWARE_VERSION = 'HD_FIRM_1003',
+  WRONG_MAGIC_NUMBER = 'HD_FIRM_1004',
+  SIGNATURE_NOT_VERIFIED = 'HD_FIRM_1005',
+  LOWER_FIRMWARE_VERSION = 'HD_FIRM_1006',
+  NOT_IN_RECEIVING_MODE = 'HD_FIRM_1007',
+
+  NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
+  UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500',
+  WRITE_REJECTED = 'HD_COM_5001',
+  EXECUTING_OTHER_COMMAND = 'HD_COM_5002'
 }
 
-const defaultErrorMessages = {
-  [DeviceErrorType.NOT_CONNECTED]: 'No device connected',
-  [DeviceErrorType.CONNECTION_CLOSED]: 'Connection was closed while in process',
-  [DeviceErrorType.CONNECTION_NOT_OPEN]: 'Connection was not open',
-  [DeviceErrorType.WRITE_ERROR]: 'Unable to write packet to the device',
-  [DeviceErrorType.WRITE_TIMEOUT]: 'Did not receive ACK of sent packet on time',
-  [DeviceErrorType.READ_TIMEOUT]:
-    'Did not receive the expected data from device on time',
-  [DeviceErrorType.NO_WORKING_PACKET_VERSION]:
-    'No packet version is working with this device.',
-  [DeviceErrorType.WRITE_REJECTED]:
-    'The write packet operation was rejected by the device',
-  [DeviceErrorType.EXECUTING_OTHER_COMMAND]:
-    'The device is executing some other command'
+const errorObjects = {
+  [DeviceErrorType.NOT_CONNECTED]: {
+    message: 'No device connected',
+    doRetry: false
+  },
+
+  [DeviceErrorType.DEVICE_DISCONNECTED_IN_FLOW]: {
+    message: 'Device disconnected in flow',
+    doRetry: false
+  },
+  [DeviceErrorType.CONNECTION_CLOSED]: {
+    message: 'Connection was closed while in process',
+    doRetry: false
+  },
+  [DeviceErrorType.CONNECTION_NOT_OPEN]: {
+    message: 'Connection was not open',
+    doRetry: false
+  },
+
+  [DeviceErrorType.WRITE_ERROR]: {
+    message: 'Unable to write packet to the device',
+    doRetry: true
+  },
+
+  [DeviceErrorType.TIMEOUT_ERROR]: {
+    message: 'Timeout Error due to write/read',
+    doRetry: true
+  },
+  [DeviceErrorType.WRITE_TIMEOUT]: {
+    message: 'Did not receive ACK of sent packet on time',
+    doRetry: true
+  },
+  [DeviceErrorType.READ_TIMEOUT]: {
+    message: 'Did not receive the expected data from device on time',
+    doRetry: true
+  },
+
+  [DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED]: {
+    message: 'Firmware Size Limit Exceed',
+    doRetry: false
+  },
+  [DeviceErrorType.WRONG_FIRMWARE_VERSION]: {
+    message: 'Wrong Firmware version',
+    doRetry: false
+  },
+  [DeviceErrorType.WRONG_HARDWARE_VERSION]: {
+    message: 'Wrong Hardware version',
+    doRetry: false
+  },
+  [DeviceErrorType.WRONG_MAGIC_NUMBER]: {
+    message: 'Wrong Magic Number',
+    doRetry: false
+  },
+  [DeviceErrorType.SIGNATURE_NOT_VERIFIED]: {
+    message: 'Signature not verified',
+    doRetry: false
+  },
+  [DeviceErrorType.LOWER_FIRMWARE_VERSION]: {
+    message: 'Lower Firmware version',
+    doRetry: false
+  },
+
+  [DeviceErrorType.NO_WORKING_PACKET_VERSION]: {
+    message: 'No working packet version',
+    doRetry: false
+  },
+  [DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR]: {
+    message: 'Unknown Error at communication module',
+    doRetry: true
+  },
+  [DeviceErrorType.WRITE_REJECTED]: {
+    message: 'The write packet operation was rejected by the device',
+    doRetry: false
+  },
+  [DeviceErrorType.EXECUTING_OTHER_COMMAND]: {
+    message: 'The device is executing some other command',
+    doRetry: false
+  },
+  [DeviceErrorType.NOT_IN_RECEIVING_MODE]: {
+    message: 'The device is in fault state',
+    doRetry: false
+  }
 };
 
 export class DeviceError extends Error {
+  // remove below line
   public errorType: DeviceErrorType;
-  constructor(errorType: DeviceErrorType, msg?: string) {
-    let message = msg;
-
-    if (!msg && defaultErrorMessages[errorType]) {
-      message = defaultErrorMessages[errorType];
-    }
-
-    super(message);
-    this.errorType = errorType;
-
+  public code: DeviceErrorType;
+  public message: string;
+  public doRetry: boolean;
+  constructor(errorCode: DeviceErrorType) {
+    super();
+    this.code = errorCode || DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR;
+    // remove below line
+    this.errorType = errorCode || DeviceErrorType.UNKNOWN_COMMUNICATION_ERROR;
+    this.message = errorObjects[this.errorType].message;
+    this.doRetry = errorObjects[this.errorType].doRetry;
     Object.setPrototypeOf(this, DeviceError.prototype);
   }
 }

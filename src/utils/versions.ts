@@ -7,4 +7,8 @@ export const PacketVersionMap = {
 };
 
 // Order is from older to newer
-export const PacketVersionList = Object.values(PacketVersionMap);
+export const PacketVersionList: PacketVersion[] = [
+  PacketVersionMap.v1,
+  PacketVersionMap.v2,
+  PacketVersionMap.v3
+];

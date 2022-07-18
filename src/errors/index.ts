@@ -12,7 +12,6 @@ export enum DeviceErrorType {
   READ_TIMEOUT = 'HD_COM_1052',
 
   FIRMWARE_SIZE_LIMIT_EXCEEDED = 'HD_FIRM_1001',
-  WRONG_FIRMWARE_VERSION = 'HD_FIRM_1002',
   WRONG_HARDWARE_VERSION = 'HD_FIRM_1003',
   WRONG_MAGIC_NUMBER = 'HD_FIRM_1004',
   SIGNATURE_NOT_VERIFIED = 'HD_FIRM_1005',
@@ -64,10 +63,6 @@ const errorObjects = {
 
   [DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED]: {
     message: 'Firmware Size Limit Exceed',
-    doRetry: false
-  },
-  [DeviceErrorType.WRONG_FIRMWARE_VERSION]: {
-    message: 'Wrong Firmware version',
     doRetry: false
   },
   [DeviceErrorType.WRONG_HARDWARE_VERSION]: {

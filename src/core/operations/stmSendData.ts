@@ -13,12 +13,12 @@ const ERROR_CODES = [
     errorObj: DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED
   },
   {
-    code: '08',
-    message: 'Wrong firmware version',
-    errorObj: DeviceErrorType.WRONG_FIRMWARE_VERSION
+    code: '09',
+    message: 'Lower firmware version',
+    errorObj: DeviceErrorType.LOWER_FIRMWARE_VERSION
   },
   {
-    code: '09',
+    code: '08',
     message: 'Wrong hardware version',
     errorObj: DeviceErrorType.WRONG_HARDWARE_VERSION
   },

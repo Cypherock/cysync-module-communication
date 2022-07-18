@@ -9,27 +9,38 @@ const RECEIVING_MODE_PACKET = '43';
 const ERROR_CODES = [
   {
     code: '07',
-    message: 'Limit exceeded',
     errorObj: DeviceErrorType.FIRMWARE_SIZE_LIMIT_EXCEEDED
   },
   {
-    code: '09',
-    message: 'Lower firmware version',
-    errorObj: DeviceErrorType.LOWER_FIRMWARE_VERSION
-  },
-  {
     code: '08',
-    message: 'Wrong hardware version',
     errorObj: DeviceErrorType.WRONG_HARDWARE_VERSION
   },
   {
+    code: '09',
+    errorObj: DeviceErrorType.LOWER_FIRMWARE_VERSION
+  },
+  {
     code: '0a',
-    message: 'Wrong magic number',
     errorObj: DeviceErrorType.WRONG_MAGIC_NUMBER
   },
   {
     code: '0b',
-    message: 'Signature not verified',
+    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
+  },
+  {
+    code: '0c',
+    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
+  },
+  {
+    code: '0d',
+    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
+  },
+  {
+    code: '0e',
+    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
+  },
+  {
+    code: '15',
     errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
   }
 ];

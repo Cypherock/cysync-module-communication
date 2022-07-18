@@ -17,6 +17,10 @@ export enum DeviceErrorType {
   SIGNATURE_NOT_VERIFIED = 'HD_FIRM_1005',
   LOWER_FIRMWARE_VERSION = 'HD_FIRM_1006',
   NOT_IN_RECEIVING_MODE = 'HD_FIRM_1007',
+  FLASH_WRITE_ERROR = 'HD_FIRM_1008',
+  FLASH_CRC_MISMATCH = 'HD_FIRM_1009',
+  FLASH_TIMEOUT_ERROR = 'HD_FIRM_1010',
+  FLASH_NACK = 'HD_FIRM_1011',
 
   NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
   UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500',
@@ -24,7 +28,14 @@ export enum DeviceErrorType {
   EXECUTING_OTHER_COMMAND = 'HD_COM_5002'
 }
 
-const errorObjects = {
+type CodeToErrorMap = {
+  [property in DeviceErrorType]: {
+    message: string;
+    doRetry: boolean;
+  };
+};
+
+const errorObjects: CodeToErrorMap = {
   [DeviceErrorType.NOT_CONNECTED]: {
     message: 'No device connected',
     doRetry: false
@@ -80,6 +91,22 @@ const errorObjects = {
   [DeviceErrorType.LOWER_FIRMWARE_VERSION]: {
     message: 'Lower Firmware version',
     doRetry: false
+  },
+  [DeviceErrorType.FLASH_WRITE_ERROR]: {
+    message: 'Flash Write Error',
+    doRetry: true
+  },
+  [DeviceErrorType.FLASH_CRC_MISMATCH]: {
+    message: 'Flash CRC Mismatch',
+    doRetry: true
+  },
+  [DeviceErrorType.FLASH_TIMEOUT_ERROR]: {
+    message: 'Flash Timeout Error',
+    doRetry: false
+  },
+  [DeviceErrorType.FLASH_NACK]: {
+    message: 'Flash Negative Acknowledgement',
+    doRetry: true
   },
 
   [DeviceErrorType.NO_WORKING_PACKET_VERSION]: {

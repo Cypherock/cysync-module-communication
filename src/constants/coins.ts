@@ -165,7 +165,7 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     fees: 'Gwei',
     network: 'main',
     chain: 1,
-    erc20TokensList: ERC20TOKENSLIST
+    tokenList: ERC20TOKENSLIST
   }),
   ethr: new EthCoinData({
     abbr: 'ethr',
@@ -179,7 +179,7 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     isTest: true,
     network: 'ropsten',
     chain: 3,
-    erc20TokensList: ERC20TOKENSLISTROPSTEN
+    tokenList: ERC20TOKENSLISTROPSTEN
   })
 };
 

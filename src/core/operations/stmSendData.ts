@@ -1,9 +1,11 @@
-import { DeviceError, DeviceErrorType } from '../../../errors';
-import { logger } from '../../../utils';
-import { stmXmodemEncode } from '../../../xmodem/legacy';
-import { DeviceConnectionInterface } from '../../types';
+import { DeviceError, DeviceErrorType } from '../../errors';
+import { logger } from '../../utils';
+import { stmXmodemEncode } from '../../xmodem/legacy';
+import { DeviceConnectionInterface } from '../types';
 
 const ACK_PACKET = '06';
+const RECEIVING_MODE_PACKET = '43';
+
 const ERROR_CODES = [
   {
     code: '07',
@@ -111,12 +113,70 @@ const writePacket = (
   });
 };
 
+const checkIfInReceivingMode = async (
+  connection: DeviceConnectionInterface,
+  options?: { timeout?: number }
+) => {
+  return new Promise((resolve, reject) => {
+    /**
+     * Ensure is listener is activated first before writing
+     */
+    let timeout: NodeJS.Timeout;
+
+    if (!connection.isConnected()) {
+      throw new DeviceError(DeviceErrorType.CONNECTION_CLOSED);
+    }
+
+    const eListener = (ePacket: any) => {
+      const ePacketData = ePacket.toString('hex');
+
+      if (ePacketData.includes(RECEIVING_MODE_PACKET)) {
+        resolve(undefined);
+        connection.removeListener('data', eListener);
+        connection.removeListener('close', onClose);
+      }
+    };
+
+    function onClose(err: any) {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+
+      connection.removeListener('ack', eListener);
+      connection.removeListener('close', onClose);
+
+      if (err) {
+        logger.error(err);
+      }
+
+      reject(new DeviceError(DeviceErrorType.CONNECTION_CLOSED));
+    }
+
+    connection.addListener('data', eListener);
+    connection.addListener('close', onClose);
+
+    timeout = setTimeout(() => {
+      connection.removeListener('data', eListener);
+      connection.removeListener('close', onClose);
+      reject(new DeviceError(DeviceErrorType.NOT_IN_RECEIVING_MODE));
+    }, options?.timeout || 2000);
+  });
+};
+
 export const stmUpdateSendData = async (
   connection: DeviceConnectionInterface,
   data: string,
   onProgress: (percent: number) => void
 ) => {
   const packetsList = stmXmodemEncode(data);
+
+  try {
+    await checkIfInReceivingMode(connection);
+  } catch (error) {
+    logger.error(error);
+    throw error;
+  }
+
   /**
    * Create a list of each packet and self contained retries and listener
    */

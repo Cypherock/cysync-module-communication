@@ -17,6 +17,7 @@ export enum DeviceErrorType {
   WRONG_MAGIC_NUMBER = 'HD_FIRM_1004',
   SIGNATURE_NOT_VERIFIED = 'HD_FIRM_1005',
   LOWER_FIRMWARE_VERSION = 'HD_FIRM_1006',
+  NOT_IN_RECEIVING_MODE = 'HD_FIRM_1007',
 
   NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
   UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500',
@@ -100,6 +101,10 @@ const errorObjects = {
   },
   [DeviceErrorType.EXECUTING_OTHER_COMMAND]: {
     message: 'The device is executing some other command',
+    doRetry: false
+  },
+  [DeviceErrorType.NOT_IN_RECEIVING_MODE]: {
+    message: 'The device is in fault state',
     doRetry: false
   }
 };

@@ -29,19 +29,19 @@ const ERROR_CODES = [
   },
   {
     code: '0c',
-    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
+    errorObj: DeviceErrorType.FLASH_WRITE_ERROR
   },
   {
     code: '0d',
-    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
+    errorObj: DeviceErrorType.FLASH_CRC_MISMATCH
   },
   {
     code: '0e',
-    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
+    errorObj: DeviceErrorType.FLASH_TIMEOUT_ERROR
   },
   {
     code: '15',
-    errorObj: DeviceErrorType.SIGNATURE_NOT_VERIFIED
+    errorObj: DeviceErrorType.FLASH_NACK
   }
 ];
 

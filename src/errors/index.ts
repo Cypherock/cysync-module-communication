@@ -22,7 +22,8 @@ export enum DeviceErrorType {
   NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
   UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500',
   WRITE_REJECTED = 'HD_COM_5001',
-  EXECUTING_OTHER_COMMAND = 'HD_COM_5002'
+  EXECUTING_OTHER_COMMAND = 'HD_COM_5002',
+  PROCESS_ABORTED_BY_USER = 'HD_COM_5100'
 }
 
 const errorObjects = {
@@ -105,6 +106,10 @@ const errorObjects = {
   },
   [DeviceErrorType.NOT_IN_RECEIVING_MODE]: {
     message: 'The device is in fault state',
+    doRetry: false
+  },
+  [DeviceErrorType.PROCESS_ABORTED_BY_USER]: {
+    message: 'Abort process dont care',
     doRetry: false
   }
 };

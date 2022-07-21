@@ -70,6 +70,14 @@ export const waitForPacket = ({
               );
 
               const rejectStatus = parseInt(`0x${rawData}`, 16);
+              if (
+                rejectStatus === ErrorPacketRejectReason.INVALID_SEQUENCE_NO
+              ) {
+                error = new DeviceError(
+                  DeviceErrorType.PROCESS_ABORTED_BY_USER
+                );
+                break;
+              }
 
               let rejectReason: string;
 

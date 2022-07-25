@@ -10,6 +10,7 @@ export enum DeviceErrorType {
   TIMEOUT_ERROR = 'HD_COM_1050',
   WRITE_TIMEOUT = 'HD_COM_1051',
   READ_TIMEOUT = 'HD_COM_1052',
+  DEVICE_ABORT = 'HD_COM_2000',
 
   FIRMWARE_SIZE_LIMIT_EXCEEDED = 'HD_FIRM_1001',
   WRONG_FIRMWARE_VERSION = 'HD_FIRM_1002',
@@ -59,6 +60,10 @@ const errorObjects = {
   },
   [DeviceErrorType.READ_TIMEOUT]: {
     message: 'Did not receive the expected data from device on time',
+    doRetry: true
+  },
+  [DeviceErrorType.DEVICE_ABORT]: {
+    message: 'The request was timed out on the device',
     doRetry: true
   },
 

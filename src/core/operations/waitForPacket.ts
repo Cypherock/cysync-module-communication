@@ -70,8 +70,10 @@ export const waitForPacket = ({
               );
 
               const rejectStatus = parseInt(`0x${rawData}`, 16);
+              const latestSeqNumber = connection.getSequenceNumber();
               if (
-                rejectStatus === ErrorPacketRejectReason.INVALID_SEQUENCE_NO
+                rejectStatus === ErrorPacketRejectReason.INVALID_SEQUENCE_NO &&
+                latestSeqNumber !== sequenceNumber
               ) {
                 error = new DeviceError(
                   DeviceErrorType.PROCESS_ABORTED_BY_USER

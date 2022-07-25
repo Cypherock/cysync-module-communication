@@ -176,6 +176,10 @@ export const getCommandOutput = async ({
     output = decodeStatus(rawData, version);
   } else {
     output = decodeRawData(rawData, version);
+
+    if (output.commandType === 42 && output.data.startsWith('04')) {
+      throw new DeviceError(DeviceErrorType.DEVICE_ABORT);
+    }
   }
 
   return output;

@@ -54,6 +54,10 @@ export class BaseDeviceConnection extends EventEmitter {
     return ++this.sequenceNumber;
   }
 
+  public getSequenceNumber() {
+    return this.sequenceNumber;
+  }
+
   /**
    * Returns if the device is connected or not
    */

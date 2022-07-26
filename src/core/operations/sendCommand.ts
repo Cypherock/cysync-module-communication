@@ -123,7 +123,9 @@ export const sendCommand = async ({
               DeviceErrorType.CONNECTION_CLOSED,
               DeviceErrorType.CONNECTION_NOT_OPEN,
               DeviceErrorType.NOT_CONNECTED,
-              DeviceErrorType.WRITE_REJECTED
+              DeviceErrorType.WRITE_REJECTED,
+              DeviceErrorType.DEVICE_ABORT,
+              DeviceErrorType.PROCESS_ABORTED_BY_USER
             ].includes(e.errorType)
           ) {
             tries = _maxTries;

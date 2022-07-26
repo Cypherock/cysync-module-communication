@@ -29,4 +29,5 @@ export interface DeviceConnectionInterface {
   addListener: EventEmitter['addListener'];
   removeListener: EventEmitter['removeListener'];
   removeAllListeners: EventEmitter['removeAllListeners'];
+  getSequenceNumber(): number;
 }

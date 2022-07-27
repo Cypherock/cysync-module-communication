@@ -60,5 +60,6 @@ export abstract class AbsCoinData {
 export enum CoinGroup {
   BitcoinForks,
   Ethereum,
-  ERC20Tokens
+  ERC20Tokens,
+  Near
 }

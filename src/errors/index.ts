@@ -10,6 +10,7 @@ export enum DeviceErrorType {
   TIMEOUT_ERROR = 'HD_COM_1050',
   WRITE_TIMEOUT = 'HD_COM_1051',
   READ_TIMEOUT = 'HD_COM_1052',
+  DEVICE_ABORT = 'HD_COM_2000',
 
   FIRMWARE_SIZE_LIMIT_EXCEEDED = 'HD_FIRM_1001',
   WRONG_HARDWARE_VERSION = 'HD_FIRM_1003',
@@ -25,7 +26,8 @@ export enum DeviceErrorType {
   NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
   UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500',
   WRITE_REJECTED = 'HD_COM_5001',
-  EXECUTING_OTHER_COMMAND = 'HD_COM_5002'
+  EXECUTING_OTHER_COMMAND = 'HD_COM_5002',
+  PROCESS_ABORTED_BY_USER = 'HD_COM_5100'
 }
 
 type CodeToErrorMap = {
@@ -69,6 +71,10 @@ const errorObjects: CodeToErrorMap = {
   },
   [DeviceErrorType.READ_TIMEOUT]: {
     message: 'Did not receive the expected data from device on time',
+    doRetry: true
+  },
+  [DeviceErrorType.DEVICE_ABORT]: {
+    message: 'The request was timed out on the device',
     doRetry: true
   },
 
@@ -127,6 +133,10 @@ const errorObjects: CodeToErrorMap = {
   },
   [DeviceErrorType.NOT_IN_RECEIVING_MODE]: {
     message: 'The device is in fault state',
+    doRetry: false
+  },
+  [DeviceErrorType.PROCESS_ABORTED_BY_USER]: {
+    message: 'Abort process dont care',
     doRetry: false
   }
 };

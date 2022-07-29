@@ -5,7 +5,12 @@ import { DeviceError, DeviceErrorType } from '../../errors';
 import { logger } from '../../utils';
 import { isSDKSupported, SDK_TO_PACKET_VERSION } from '../../utils/sdkVersions';
 import { PacketVersion, PacketVersionMap } from '../../utils/versions';
-import { formatSDKVersion, RawData, StatusData } from '../../xmodem';
+import {
+  DeviceIdleState,
+  formatSDKVersion,
+  RawData,
+  StatusData
+} from '../../xmodem';
 import {
   createAckPacket,
   LegacyDecodedPacketData,
@@ -449,14 +454,23 @@ export class DeviceConnection
       throw new Error('Only v3 packets are supported');
     }
 
-    const resp = await operations.sendAbort({
-      connection: this,
-      version,
-      sequenceNumber: params.sequenceNumber,
-      maxTries: params.maxTries
-    });
+    const status = await this.getStatus({ maxTries: 2 });
+    if (
+      status.deviceIdleState === DeviceIdleState.USB &&
+      !status.abortDisabled
+    ) {
+      const resp = await operations.sendAbort({
+        connection: this,
+        version,
+        sequenceNumber: params.sequenceNumber,
+        maxTries: params.maxTries
+      });
 
-    return resp;
+      return resp;
+    } else {
+      logger.info("Abort rejected based on device's current status ");
+      logger.info(status);
+    }
   }
 
   public async isDeviceSupported() {

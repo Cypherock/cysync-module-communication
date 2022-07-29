@@ -131,7 +131,7 @@ export const sendAbort = async ({
       status = decodeStatus(rawData, version);
 
       if (status.currentCmdSeq !== sequenceNumber) {
-        throw new Error('Abort sequenceNumber does not match');
+        throw new Error('Abort rejected by device');
       }
 
       isSuccess = true;
@@ -143,7 +143,9 @@ export const sendAbort = async ({
             DeviceErrorType.CONNECTION_CLOSED,
             DeviceErrorType.CONNECTION_NOT_OPEN,
             DeviceErrorType.NOT_CONNECTED,
-            DeviceErrorType.WRITE_REJECTED
+            DeviceErrorType.WRITE_REJECTED,
+            DeviceErrorType.DEVICE_ABORT,
+            DeviceErrorType.PROCESS_ABORTED_BY_USER
           ].includes(e.errorType)
         ) {
           tries = _maxTries;

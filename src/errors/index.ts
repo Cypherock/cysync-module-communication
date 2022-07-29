@@ -13,12 +13,15 @@ export enum DeviceErrorType {
   DEVICE_ABORT = 'HD_COM_2000',
 
   FIRMWARE_SIZE_LIMIT_EXCEEDED = 'HD_FIRM_1001',
-  WRONG_FIRMWARE_VERSION = 'HD_FIRM_1002',
   WRONG_HARDWARE_VERSION = 'HD_FIRM_1003',
   WRONG_MAGIC_NUMBER = 'HD_FIRM_1004',
   SIGNATURE_NOT_VERIFIED = 'HD_FIRM_1005',
   LOWER_FIRMWARE_VERSION = 'HD_FIRM_1006',
   NOT_IN_RECEIVING_MODE = 'HD_FIRM_1007',
+  FLASH_WRITE_ERROR = 'HD_FIRM_1008',
+  FLASH_CRC_MISMATCH = 'HD_FIRM_1009',
+  FLASH_TIMEOUT_ERROR = 'HD_FIRM_1010',
+  FLASH_NACK = 'HD_FIRM_1011',
 
   NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
   UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500',
@@ -27,7 +30,14 @@ export enum DeviceErrorType {
   PROCESS_ABORTED_BY_USER = 'HD_COM_5100'
 }
 
-const errorObjects = {
+type CodeToErrorMap = {
+  [property in DeviceErrorType]: {
+    message: string;
+    doRetry: boolean;
+  };
+};
+
+const errorObjects: CodeToErrorMap = {
   [DeviceErrorType.NOT_CONNECTED]: {
     message: 'No device connected',
     doRetry: false
@@ -72,10 +82,6 @@ const errorObjects = {
     message: 'Firmware Size Limit Exceed',
     doRetry: false
   },
-  [DeviceErrorType.WRONG_FIRMWARE_VERSION]: {
-    message: 'Wrong Firmware version',
-    doRetry: false
-  },
   [DeviceErrorType.WRONG_HARDWARE_VERSION]: {
     message: 'Wrong Hardware version',
     doRetry: false
@@ -91,6 +97,22 @@ const errorObjects = {
   [DeviceErrorType.LOWER_FIRMWARE_VERSION]: {
     message: 'Lower Firmware version',
     doRetry: false
+  },
+  [DeviceErrorType.FLASH_WRITE_ERROR]: {
+    message: 'Flash Write Error',
+    doRetry: true
+  },
+  [DeviceErrorType.FLASH_CRC_MISMATCH]: {
+    message: 'Flash CRC Mismatch',
+    doRetry: true
+  },
+  [DeviceErrorType.FLASH_TIMEOUT_ERROR]: {
+    message: 'Flash Timeout Error',
+    doRetry: false
+  },
+  [DeviceErrorType.FLASH_NACK]: {
+    message: 'Flash Negative Acknowledgement',
+    doRetry: true
   },
 
   [DeviceErrorType.NO_WORKING_PACKET_VERSION]: {

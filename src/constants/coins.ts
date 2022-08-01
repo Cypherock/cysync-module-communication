@@ -1,8 +1,8 @@
-import { AbsCoinData } from './AbsCoinData';
 import { BtcCoinData } from './BtcCoinData';
 import { CoinData } from './CoinData';
 import { Erc20CoinData } from './Erc20CoinData';
 import erc20List from './erc20List.json';
+import erc20ListRopsten from './erc20ListRopsten.json';
 import { EthCoinData } from './EthCoinData';
 import { NearCoinData } from './NearCoinData';
 
@@ -62,34 +62,6 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
   })
 };
 
-export const ETHCOINS: Record<string, EthCoinData> = {
-  eth: new EthCoinData({
-    abbr: 'eth',
-    name: 'Ethereum',
-    validatorCoinName: 'eth',
-    validatorNetworkType: 'prod',
-    coinIndex: '8000003c',
-    customCoinIndex: '80000005',
-    decimal: 18,
-    fees: 'Gwei',
-    network: 'main',
-    chain: 1
-  }),
-  ethr: new EthCoinData({
-    abbr: 'ethr',
-    name: 'Ethereum Ropsten',
-    validatorCoinName: 'eth',
-    validatorNetworkType: 'testnet',
-    coinIndex: '8000003c',
-    customCoinIndex: '80000006',
-    decimal: 18,
-    fees: 'Gwei',
-    isTest: true,
-    network: 'ropsten',
-    chain: 3
-  })
-};
-
 export const NEARCOINS: Record<string, NearCoinData> = {
   near: new NearCoinData({
     abbr: 'near',
@@ -107,6 +79,7 @@ export const NEARCOINS: Record<string, NearCoinData> = {
 };
 
 const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
+const ERC20TOKENSLISTROPSTEN: Record<string, Erc20CoinData> = {};
 
 // This is the list of tokens that are supported by our PRICE API
 const supportedCoinList = [
@@ -186,15 +159,50 @@ for (const token of erc20List) {
   }
 }
 
-export const ERC20TOKENS = ERC20TOKENSLIST;
+for (const token of erc20ListRopsten) {
+  ERC20TOKENSLISTROPSTEN[token.abbr.toLowerCase()] = new Erc20CoinData({
+    abbr: token.abbr.toLowerCase(),
+    address: token.address,
+    decimal: token.decimal,
+    name: token.name,
+    isTest: true,
+    validatorCoinName: 'ethr',
+    validatorNetworkType: 'testnet'
+  });
+}
+
+export const ETHCOINS: Record<string, EthCoinData> = {
+  eth: new EthCoinData({
+    abbr: 'eth',
+    name: 'Ethereum',
+    validatorCoinName: 'eth',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '80000005',
+    decimal: 18,
+    fees: 'Gwei',
+    network: 'main',
+    chain: 1,
+    tokenList: ERC20TOKENSLIST
+  }),
+  ethr: new EthCoinData({
+    abbr: 'ethr',
+    name: 'Ethereum Ropsten',
+    validatorCoinName: 'eth',
+    validatorNetworkType: 'testnet',
+    coinIndex: '8000003c',
+    customCoinIndex: '80000006',
+    decimal: 18,
+    fees: 'Gwei',
+    isTest: true,
+    network: 'ropsten',
+    chain: 3,
+    tokenList: ERC20TOKENSLISTROPSTEN
+  })
+};
 
 export const COINS: Record<string, CoinData> = {
   ...BTCCOINS,
   ...ETHCOINS,
   ...NEARCOINS
-};
-
-export const ALLCOINS: Record<string, AbsCoinData> = {
-  ...COINS,
-  ...ERC20TOKENS
 };

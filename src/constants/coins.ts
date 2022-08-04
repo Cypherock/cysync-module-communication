@@ -81,87 +81,22 @@ export const NEARCOINS: Record<string, NearCoinData> = {
 const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
 const ERC20TOKENSLISTROPSTEN: Record<string, Erc20CoinData> = {};
 
-// This is the list of tokens that are supported by our PRICE API
-const supportedCoinList = [
-  'XRP',
-  'BCH',
-  'ADA',
-  'XLM',
-  'NEO',
-  'EOS',
-  'XEM',
-  'IOTA',
-  'XMR',
-  'TRX',
-  'ICX',
-  'ETC',
-  'QTUM',
-  'BTG',
-  'LSK',
-  'USDT',
-  'OMG',
-  'ZEC',
-  'SC',
-  'ZRX',
-  'REP',
-  'WAVES',
-  'MKR',
-  'DCR',
-  'BAT',
-  'LRC',
-  'KNC',
-  'BNT',
-  'LINK',
-  'CVC',
-  'STORJ',
-  'ANT',
-  'SNGLS',
-  'MANA',
-  'MLN',
-  'DNT',
-  'NMR',
-  'DOT',
-  'DAI',
-  'UNI',
-  'ATOM',
-  'GRT',
-  'XTZ',
-  'FIL',
-  'NANO',
-  'WBTC',
-  'BSV',
-  'USDC',
-  'OXT',
-  'ALGO',
-  'BAND',
-  'BTT',
-  'FET',
-  'KAVA',
-  'PAX',
-  'PAXG',
-  'REN',
-  'AAVE',
-  'YFI',
-  'NU'
-];
-
 for (const token of erc20List) {
-  // Only add if the token is supported by price API
-  if (supportedCoinList.includes(token.abbr)) {
-    ERC20TOKENSLIST[token.abbr.toLowerCase()] = new Erc20CoinData({
-      abbr: token.abbr.toLowerCase(),
-      address: token.address,
-      decimal: token.decimal,
-      name: token.name,
-      validatorCoinName: 'eth',
-      validatorNetworkType: 'prod'
-    });
-  }
+  ERC20TOKENSLIST[token.symbol.toLowerCase()] = new Erc20CoinData({
+    abbr: token.symbol.toLowerCase(),
+    id: token.id,
+    address: token.address,
+    decimal: token.decimal ?? 18,
+    name: token.name,
+    validatorCoinName: 'eth',
+    validatorNetworkType: 'prod'
+  });
 }
 
 for (const token of erc20ListRopsten) {
   ERC20TOKENSLISTROPSTEN[token.abbr.toLowerCase()] = new Erc20CoinData({
     abbr: token.abbr.toLowerCase(),
+    id: token.abbr.toLowerCase(),
     address: token.address,
     decimal: token.decimal,
     name: token.name,

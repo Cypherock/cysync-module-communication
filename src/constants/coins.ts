@@ -15,7 +15,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000000',
     customCoinIndex: '80000000',
     decimal: 8,
-    fees: 'sat per byte',
+    fees: 'sat/byte',
     hasSegwit: true
   }),
   btct: new BtcCoinData({
@@ -26,7 +26,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000001',
     customCoinIndex: '80000001',
     decimal: 8,
-    fees: 'sat per byte',
+    fees: 'sat/byte',
     hasSegwit: true,
     isTest: true
   }),
@@ -38,7 +38,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000002',
     customCoinIndex: '80000002',
     decimal: 8,
-    fees: 'sat / byte'
+    fees: 'sat/byte'
   }),
   doge: new BtcCoinData({
     abbr: 'doge',
@@ -48,7 +48,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000003',
     customCoinIndex: '80000003',
     decimal: 8,
-    fees: 'sat per byte'
+    fees: 'sat/byte'
   }),
   dash: new BtcCoinData({
     abbr: 'dash',
@@ -58,7 +58,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000005',
     customCoinIndex: '80000004',
     decimal: 8,
-    fees: 'sat / byte'
+    fees: 'sat/byte'
   })
 };
 
@@ -72,7 +72,7 @@ export const NEARCOINS: Record<string, NearCoinData> = {
     coinIndex: '8000018d',
     customCoinIndex: '80000007',
     decimal: 24,
-    fees: 'Gwei',
+    fees: 'TGas',
     isTest: true,
     network: 'testnet'
   })

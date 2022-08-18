@@ -380,7 +380,10 @@ export class DeviceConnection
     return operations.sendBootloaderAbort(this);
   }
 
-  public async getStatus(params?: { maxTries?: number }): Promise<StatusData> {
+  public async getStatus(params?: {
+    maxTries?: number;
+    logsDisabled?: boolean;
+  }): Promise<StatusData> {
     const version = this.getPacketVersion();
 
     if (version !== PacketVersionMap.v3) {
@@ -390,7 +393,8 @@ export class DeviceConnection
     const resp = await operations.getStatus({
       connection: this,
       version: this.getPacketVersion(),
-      maxTries: params?.maxTries
+      maxTries: params?.maxTries,
+      logsDisabled: params?.logsDisabled
     });
 
     if (!resp) {

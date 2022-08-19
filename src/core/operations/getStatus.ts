@@ -77,17 +77,19 @@ const writeCommand = async ({
 export const getStatus = async ({
   connection,
   version,
-  maxTries = 5
+  maxTries = 5,
+  logsDisabled = false
 }: {
   connection: DeviceConnectionInterface;
   version: PacketVersion;
   maxTries?: number;
+  logsDisabled?: boolean;
 }): Promise<StatusData> => {
   if (version !== PacketVersionMap.v3) {
     throw new Error('Only v3 packets are supported');
   }
 
-  logger.info('Getting status');
+  if (!logsDisabled) logger.info('Getting status');
 
   const usableCommands = commands.v3;
 
@@ -159,7 +161,7 @@ export const getStatus = async ({
 
   const status = decodeStatus(rawData, version);
 
-  logger.info(status);
+  if (!logsDisabled) logger.info(status);
 
   return status;
 };

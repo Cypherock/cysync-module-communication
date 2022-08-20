@@ -47,7 +47,7 @@ export abstract class AbsCoinData {
     hasSegwit = false,
     isTest = false,
     group = CoinGroup.BitcoinForks,
-    id = undefined
+    id
   }: IAbsCoinDataOptions) {
     this.abbr = abbr;
     this.validatorCoinName = validatorCoinName;

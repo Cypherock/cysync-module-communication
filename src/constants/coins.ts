@@ -73,6 +73,7 @@ export const NEARCOINS: Record<string, NearCoinData> = {
     customCoinIndex: '80000007',
     decimal: 24,
     fees: 'TGas',
+    id: 'near',
     isTest: true,
     network: 'testnet'
   })
@@ -117,6 +118,7 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     decimal: 18,
     fees: 'Gwei',
     network: 'main',
+    id: 'ethereum',
     chain: 1,
     tokenList: ERC20TOKENSLIST
   }),

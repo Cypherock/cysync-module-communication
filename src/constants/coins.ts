@@ -16,6 +16,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     customCoinIndex: '80000000',
     decimal: 8,
     fees: 'sat/byte',
+    id: 'bitcoin',
     hasSegwit: true
   }),
   btct: new BtcCoinData({
@@ -38,7 +39,8 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000002',
     customCoinIndex: '80000002',
     decimal: 8,
-    fees: 'sat/byte'
+    fees: 'sat/byte',
+    id: 'litecoin'
   }),
   doge: new BtcCoinData({
     abbr: 'doge',
@@ -48,7 +50,8 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000003',
     customCoinIndex: '80000003',
     decimal: 8,
-    fees: 'sat/byte'
+    fees: 'sat/byte',
+    id: 'dogecoin'
   }),
   dash: new BtcCoinData({
     abbr: 'dash',
@@ -58,7 +61,8 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000005',
     customCoinIndex: '80000004',
     decimal: 8,
-    fees: 'sat/byte'
+    fees: 'sat/byte',
+    id: 'dash'
   })
 };
 

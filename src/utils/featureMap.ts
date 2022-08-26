@@ -1,12 +1,12 @@
-export enum FeatureName{
+export enum FeatureName {
   Default = 0,
-  TokenNameRestructure,
+  TokenNameRestructure
 }
 
-const FeatureMap:Record<string, FeatureName> ={
+const FeatureMap: Record<string, FeatureName> = {
   '2.1.0': FeatureName.TokenNameRestructure
 };
 
-export const getFeatureNameFromSdkVersion = (sdk:string):FeatureName=>{
+export const getFeatureNameFromSdkVersion = (sdk: string): FeatureName => {
   return FeatureMap[sdk] ?? FeatureName.Default;
-}
+};

@@ -16,7 +16,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     customCoinIndex: '80000000',
     decimal: 8,
     fees: 'sat/byte',
-    id: 'bitcoin',
+    coinGeckoId: 'bitcoin',
     hasSegwit: true
   }),
   btct: new BtcCoinData({
@@ -40,7 +40,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     customCoinIndex: '80000002',
     decimal: 8,
     fees: 'sat/byte',
-    id: 'litecoin'
+    coinGeckoId: 'litecoin'
   }),
   doge: new BtcCoinData({
     abbr: 'doge',
@@ -51,7 +51,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     customCoinIndex: '80000003',
     decimal: 8,
     fees: 'sat/byte',
-    id: 'dogecoin'
+    coinGeckoId: 'dogecoin'
   }),
   dash: new BtcCoinData({
     abbr: 'dash',
@@ -62,7 +62,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     customCoinIndex: '80000004',
     decimal: 8,
     fees: 'sat/byte',
-    id: 'dash'
+    coinGeckoId: 'dash'
   })
 };
 
@@ -77,7 +77,7 @@ export const NEARCOINS: Record<string, NearCoinData> = {
     customCoinIndex: '80000007',
     decimal: 24,
     fees: 'TGas',
-    id: 'near',
+    coinGeckoId: 'near',
     isTest: true,
     network: 'testnet'
   })
@@ -87,28 +87,30 @@ const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
 const ERC20TOKENSLISTROPSTEN: Record<string, Erc20CoinData> = {};
 
 for (const token of erc20List) {
-  ERC20TOKENSLIST[token.symbol.toLowerCase()] = new Erc20CoinData({
-    abbr: token.symbol.toLowerCase(),
-    id: token.id,
-    address: token.address,
-    decimal: token.decimal ?? 18,
-    name: token.name,
-    validatorCoinName: 'eth',
-    validatorNetworkType: 'prod'
-  });
+  if (token.symbol.length <= 16)
+    ERC20TOKENSLIST[token.symbol.toLowerCase()] = new Erc20CoinData({
+      abbr: token.symbol.toLowerCase(),
+      coinGeckoId: token.id,
+      address: token.address,
+      decimal: token.decimal ?? 18,
+      name: token.name,
+      validatorCoinName: 'eth',
+      validatorNetworkType: 'prod'
+    });
 }
 
 for (const token of erc20ListRopsten) {
-  ERC20TOKENSLISTROPSTEN[token.abbr.toLowerCase()] = new Erc20CoinData({
-    abbr: token.abbr.toLowerCase(),
-    id: token.abbr.toLowerCase(),
-    address: token.address,
-    decimal: token.decimal,
-    name: token.name,
-    isTest: true,
-    validatorCoinName: 'ethr',
-    validatorNetworkType: 'testnet'
-  });
+  if (token.abbr.length <= 16)
+    ERC20TOKENSLISTROPSTEN[token.abbr.toLowerCase()] = new Erc20CoinData({
+      abbr: token.abbr.toLowerCase(),
+      coinGeckoId: token.abbr.toLowerCase(),
+      address: token.address,
+      decimal: token.decimal,
+      name: token.name,
+      isTest: true,
+      validatorCoinName: 'ethr',
+      validatorNetworkType: 'testnet'
+    });
 }
 
 export const ETHCOINS: Record<string, EthCoinData> = {
@@ -122,7 +124,7 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     decimal: 18,
     fees: 'Gwei',
     network: 'main',
-    id: 'ethereum',
+    coinGeckoId: 'ethereum',
     chain: 1,
     tokenList: ERC20TOKENSLIST
   }),

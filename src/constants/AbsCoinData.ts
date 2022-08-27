@@ -14,6 +14,9 @@ export interface IAbsCoinDataOptions {
   isTest?: boolean;
   group?: CoinGroup;
   hasSegwit?: boolean;
+
+  // coinGeckoApi
+  coinGeckoId?: string;
 }
 
 export abstract class AbsCoinData {
@@ -33,6 +36,7 @@ export abstract class AbsCoinData {
   public isTest: boolean;
   public group: CoinGroup;
   public hasSegwit: boolean;
+  public coinGeckoId: string | undefined;
 
   constructor({
     abbr,
@@ -42,7 +46,8 @@ export abstract class AbsCoinData {
     decimal,
     hasSegwit = false,
     isTest = false,
-    group = CoinGroup.BitcoinForks
+    group = CoinGroup.BitcoinForks,
+    coinGeckoId
   }: IAbsCoinDataOptions) {
     this.abbr = abbr;
     this.validatorCoinName = validatorCoinName;
@@ -54,6 +59,7 @@ export abstract class AbsCoinData {
     this.hasSegwit = hasSegwit;
     this.isTest = isTest;
     this.group = group;
+    this.coinGeckoId = coinGeckoId;
   }
 }
 

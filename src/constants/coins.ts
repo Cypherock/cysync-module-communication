@@ -16,6 +16,7 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     customCoinIndex: '80000000',
     decimal: 8,
     fees: 'sat/byte',
+    coinGeckoId: 'bitcoin',
     hasSegwit: true
   }),
   btct: new BtcCoinData({
@@ -38,7 +39,8 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000002',
     customCoinIndex: '80000002',
     decimal: 8,
-    fees: 'sat/byte'
+    fees: 'sat/byte',
+    coinGeckoId: 'litecoin'
   }),
   doge: new BtcCoinData({
     abbr: 'doge',
@@ -48,7 +50,8 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000003',
     customCoinIndex: '80000003',
     decimal: 8,
-    fees: 'sat/byte'
+    fees: 'sat/byte',
+    coinGeckoId: 'dogecoin'
   }),
   dash: new BtcCoinData({
     abbr: 'dash',
@@ -58,7 +61,8 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinIndex: '80000005',
     customCoinIndex: '80000004',
     decimal: 8,
-    fees: 'sat/byte'
+    fees: 'sat/byte',
+    coinGeckoId: 'dash'
   })
 };
 
@@ -73,6 +77,7 @@ export const NEARCOINS: Record<string, NearCoinData> = {
     customCoinIndex: '80000007',
     decimal: 24,
     fees: 'TGas',
+    coinGeckoId: 'near',
     isTest: true,
     network: 'testnet'
   })
@@ -81,94 +86,31 @@ export const NEARCOINS: Record<string, NearCoinData> = {
 const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
 const ERC20TOKENSLISTROPSTEN: Record<string, Erc20CoinData> = {};
 
-// This is the list of tokens that are supported by our PRICE API
-const supportedCoinList = [
-  'XRP',
-  'BCH',
-  'ADA',
-  'XLM',
-  'NEO',
-  'EOS',
-  'XEM',
-  'IOTA',
-  'XMR',
-  'TRX',
-  'ICX',
-  'ETC',
-  'QTUM',
-  'BTG',
-  'LSK',
-  'USDT',
-  'OMG',
-  'ZEC',
-  'SC',
-  'ZRX',
-  'REP',
-  'WAVES',
-  'MKR',
-  'DCR',
-  'BAT',
-  'LRC',
-  'KNC',
-  'BNT',
-  'LINK',
-  'CVC',
-  'STORJ',
-  'ANT',
-  'SNGLS',
-  'MANA',
-  'MLN',
-  'DNT',
-  'NMR',
-  'DOT',
-  'DAI',
-  'UNI',
-  'ATOM',
-  'GRT',
-  'XTZ',
-  'FIL',
-  'NANO',
-  'WBTC',
-  'BSV',
-  'USDC',
-  'OXT',
-  'ALGO',
-  'BAND',
-  'BTT',
-  'FET',
-  'KAVA',
-  'PAX',
-  'PAXG',
-  'REN',
-  'AAVE',
-  'YFI',
-  'NU'
-];
-
 for (const token of erc20List) {
-  // Only add if the token is supported by price API
-  if (supportedCoinList.includes(token.abbr)) {
-    ERC20TOKENSLIST[token.abbr.toLowerCase()] = new Erc20CoinData({
-      abbr: token.abbr.toLowerCase(),
+  if (token.symbol.length <= 16)
+    ERC20TOKENSLIST[token.symbol.toLowerCase()] = new Erc20CoinData({
+      abbr: token.symbol.toLowerCase(),
+      coinGeckoId: token.id,
       address: token.address,
-      decimal: token.decimal,
+      decimal: token.decimal ?? 18,
       name: token.name,
       validatorCoinName: 'eth',
       validatorNetworkType: 'prod'
     });
-  }
 }
 
 for (const token of erc20ListRopsten) {
-  ERC20TOKENSLISTROPSTEN[token.abbr.toLowerCase()] = new Erc20CoinData({
-    abbr: token.abbr.toLowerCase(),
-    address: token.address,
-    decimal: token.decimal,
-    name: token.name,
-    isTest: true,
-    validatorCoinName: 'ethr',
-    validatorNetworkType: 'testnet'
-  });
+  if (token.abbr.length <= 16)
+    ERC20TOKENSLISTROPSTEN[token.abbr.toLowerCase()] = new Erc20CoinData({
+      abbr: token.abbr.toLowerCase(),
+      coinGeckoId: token.abbr.toLowerCase(),
+      address: token.address,
+      decimal: token.decimal,
+      name: token.name,
+      isTest: true,
+      validatorCoinName: 'ethr',
+      validatorNetworkType: 'testnet'
+    });
 }
 
 export const ETHCOINS: Record<string, EthCoinData> = {
@@ -182,6 +124,7 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     decimal: 18,
     fees: 'Gwei',
     network: 'main',
+    coinGeckoId: 'ethereum',
     chain: 1,
     tokenList: ERC20TOKENSLIST
   }),

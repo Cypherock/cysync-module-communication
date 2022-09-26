@@ -2,7 +2,6 @@ import { BtcCoinData } from './BtcCoinData';
 import { CoinData } from './CoinData';
 import { Erc20CoinData } from './Erc20CoinData';
 import erc20List from './erc20List.json';
-import erc20ListRopsten from './erc20ListRopsten.json';
 import { EthCoinData } from './EthCoinData';
 import { NearCoinData } from './NearCoinData';
 
@@ -84,7 +83,6 @@ export const NEARCOINS: Record<string, NearCoinData> = {
 };
 
 const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
-const ERC20TOKENSLISTROPSTEN: Record<string, Erc20CoinData> = {};
 
 for (const token of erc20List) {
   if (token.symbol.length <= 16)
@@ -96,20 +94,6 @@ for (const token of erc20List) {
       name: token.name,
       validatorCoinName: 'eth',
       validatorNetworkType: 'prod'
-    });
-}
-
-for (const token of erc20ListRopsten) {
-  if (token.abbr.length <= 16)
-    ERC20TOKENSLISTROPSTEN[token.abbr.toLowerCase()] = new Erc20CoinData({
-      abbr: token.abbr.toLowerCase(),
-      coinGeckoId: token.abbr.toLowerCase(),
-      address: token.address,
-      decimal: token.decimal,
-      name: token.name,
-      isTest: true,
-      validatorCoinName: 'ethr',
-      validatorNetworkType: 'testnet'
     });
 }
 
@@ -127,20 +111,6 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     coinGeckoId: 'ethereum',
     chain: 1,
     tokenList: ERC20TOKENSLIST
-  }),
-  ethr: new EthCoinData({
-    abbr: 'ethr',
-    name: 'Ethereum Ropsten',
-    validatorCoinName: 'eth',
-    validatorNetworkType: 'testnet',
-    coinIndex: '8000003c',
-    customCoinIndex: '80000006',
-    decimal: 18,
-    fees: 'Gwei',
-    isTest: true,
-    network: 'ropsten',
-    chain: 3,
-    tokenList: ERC20TOKENSLISTROPSTEN
   })
 };
 

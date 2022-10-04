@@ -67,5 +67,6 @@ export enum CoinGroup {
   BitcoinForks,
   Ethereum,
   ERC20Tokens,
-  Near
+  Near,
+  Solana
 }

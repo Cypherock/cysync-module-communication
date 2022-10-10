@@ -89,14 +89,14 @@ export const SOLANACOINS: Record<string, NearCoinData> = {
     name: 'Solana',
     curve: 'ed25519',
     validatorCoinName: 'sol',
-    validatorNetworkType: 'test',
+    validatorNetworkType: 'prod',
     coinIndex: '800001f5',
     customCoinIndex: '80000009',
     decimal: 9,
     fees: 'SOL',
     coinGeckoId: 'solana',
-    isTest: true,
-    network: 'testnet'
+    isTest: false,
+    network: 'mainnet'
   })
 };
 

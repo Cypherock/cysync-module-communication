@@ -101,6 +101,7 @@ export const SOLANACOINS: Record<string, NearCoinData> = {
 };
 
 const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
+const ERC20TOKENSLISTPOLYGON: Record<string, Erc20CoinData> = {};
 
 for (const token of erc20List) {
   if (token.symbol.length <= 16)
@@ -129,6 +130,20 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     coinGeckoId: 'ethereum',
     chain: 1,
     tokenList: ERC20TOKENSLIST
+  }),
+  matic: new EthCoinData({
+    abbr: 'matic',
+    name: 'Polygon',
+    validatorCoinName: 'matic',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '80000008',
+    decimal: 18,
+    fees: 'Gwei',
+    network: 'polygon',
+    coinGeckoId: 'matic-network',
+    chain: 137,
+    tokenList: ERC20TOKENSLISTPOLYGON
   })
 };
 

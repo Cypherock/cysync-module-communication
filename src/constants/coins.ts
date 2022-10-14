@@ -4,6 +4,7 @@ import { Erc20CoinData } from './Erc20CoinData';
 import erc20List from './erc20List.json';
 import { EthCoinData } from './EthCoinData';
 import { NearCoinData } from './NearCoinData';
+import { SolanaCoinData } from './SolanaCoinData';
 
 export const BTCCOINS: Record<string, BtcCoinData> = {
   btc: new BtcCoinData({
@@ -82,6 +83,23 @@ export const NEARCOINS: Record<string, NearCoinData> = {
   })
 };
 
+export const SOLANACOINS: Record<string, NearCoinData> = {
+  sol: new SolanaCoinData({
+    abbr: 'sol',
+    name: 'Solana',
+    curve: 'ed25519',
+    validatorCoinName: 'sol',
+    validatorNetworkType: 'prod',
+    coinIndex: '800001f5',
+    customCoinIndex: '80000009',
+    decimal: 9,
+    fees: 'SOL',
+    coinGeckoId: 'solana',
+    isTest: false,
+    network: 'mainnet'
+  })
+};
+
 const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
 const ERC20TOKENSLISTPOLYGON: Record<string, Erc20CoinData> = {};
 
@@ -132,5 +150,6 @@ export const ETHCOINS: Record<string, EthCoinData> = {
 export const COINS: Record<string, CoinData> = {
   ...BTCCOINS,
   ...ETHCOINS,
-  ...NEARCOINS
+  ...NEARCOINS,
+  ...SOLANACOINS
 };

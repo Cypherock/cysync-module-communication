@@ -4,4 +4,5 @@ export * from './BtcCoinData';
 export * from './EthCoinData';
 export * from './Erc20CoinData';
 export * from './NearCoinData';
+export * from './SolanaCoinData';
 export * from './coins';

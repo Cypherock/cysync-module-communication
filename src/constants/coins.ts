@@ -89,7 +89,7 @@ export const NEARCOINS: Record<string, NearCoinData> = {
     fees: 'TGas',
     coinGeckoId: 'near',
     isTest: false,
-    network: 'testnet',
+    network: 'mainnet',
     coinListId: 7,
     supportedVersions: [0]
   })
@@ -108,7 +108,7 @@ export const SOLANACOINS: Record<string, NearCoinData> = {
     fees: 'SOL',
     coinGeckoId: 'solana',
     isTest: false,
-    network: 'devnet',
+    network: 'mainnet',
     coinListId: 9,
     supportedVersions: [0]
   })

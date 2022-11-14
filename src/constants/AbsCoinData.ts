@@ -17,6 +17,9 @@ export interface IAbsCoinDataOptions {
 
   // coinGeckoApi
   coinGeckoId?: string;
+  // Id for supported coin list for device
+  coinListId?: number;
+  supportedVersions?: number[];
 }
 
 export abstract class AbsCoinData {
@@ -37,6 +40,8 @@ export abstract class AbsCoinData {
   public group: CoinGroup;
   public hasSegwit: boolean;
   public coinGeckoId: string | undefined;
+  public coinListId?: number;
+  public supportedVersions?: number[];
 
   constructor({
     abbr,
@@ -47,7 +52,9 @@ export abstract class AbsCoinData {
     hasSegwit = false,
     isTest = false,
     group = CoinGroup.BitcoinForks,
-    coinGeckoId
+    coinGeckoId,
+    coinListId,
+    supportedVersions
   }: IAbsCoinDataOptions) {
     this.abbr = abbr;
     this.validatorCoinName = validatorCoinName;
@@ -55,11 +62,12 @@ export abstract class AbsCoinData {
     this.name = name;
     this.decimal = decimal;
     this.multiplier = Math.pow(10, decimal);
-
     this.hasSegwit = hasSegwit;
     this.isTest = isTest;
     this.group = group;
     this.coinGeckoId = coinGeckoId;
+    this.coinListId = coinListId;
+    this.supportedVersions = supportedVersions;
   }
 }
 

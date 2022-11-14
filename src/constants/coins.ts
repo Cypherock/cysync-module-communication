@@ -17,7 +17,9 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     decimal: 8,
     fees: 'sat/byte',
     coinGeckoId: 'bitcoin',
-    hasSegwit: true
+    hasSegwit: true,
+    coinListId: 1,
+    supportedVersions: [0]
   }),
   btct: new BtcCoinData({
     abbr: 'btct',
@@ -29,7 +31,9 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     decimal: 8,
     fees: 'sat/byte',
     hasSegwit: true,
-    isTest: true
+    isTest: true,
+    coinListId: 2,
+    supportedVersions: [0]
   }),
   ltc: new BtcCoinData({
     abbr: 'ltc',
@@ -40,7 +44,9 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     customCoinIndex: '80000002',
     decimal: 8,
     fees: 'sat/byte',
-    coinGeckoId: 'litecoin'
+    coinGeckoId: 'litecoin',
+    coinListId: 3,
+    supportedVersions: [0]
   }),
   doge: new BtcCoinData({
     abbr: 'doge',
@@ -51,7 +57,9 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     customCoinIndex: '80000003',
     decimal: 8,
     fees: 'sat/byte',
-    coinGeckoId: 'dogecoin'
+    coinGeckoId: 'dogecoin',
+    coinListId: 4,
+    supportedVersions: [0]
   }),
   dash: new BtcCoinData({
     abbr: 'dash',
@@ -62,7 +70,9 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     customCoinIndex: '80000004',
     decimal: 8,
     fees: 'sat/byte',
-    coinGeckoId: 'dash'
+    coinGeckoId: 'dash',
+    coinListId: 5,
+    supportedVersions: [0]
   })
 };
 
@@ -79,7 +89,9 @@ export const NEARCOINS: Record<string, NearCoinData> = {
     fees: 'TGas',
     coinGeckoId: 'near',
     isTest: false,
-    network: 'mainnet'
+    network: 'mainnet',
+    coinListId: 7,
+    supportedVersions: [0]
   })
 };
 
@@ -96,7 +108,9 @@ export const SOLANACOINS: Record<string, NearCoinData> = {
     fees: 'SOL',
     coinGeckoId: 'solana',
     isTest: false,
-    network: 'mainnet'
+    network: 'mainnet',
+    coinListId: 9,
+    supportedVersions: [0]
   })
 };
 
@@ -129,7 +143,9 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     network: 'main',
     coinGeckoId: 'ethereum',
     chain: 1,
-    tokenList: ERC20TOKENSLIST
+    tokenList: ERC20TOKENSLIST,
+    coinListId: 6,
+    supportedVersions: [0]
   }),
   matic: new EthCoinData({
     abbr: 'matic',
@@ -143,7 +159,9 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     network: 'polygon',
     coinGeckoId: 'matic-network',
     chain: 137,
-    tokenList: ERC20TOKENSLISTPOLYGON
+    tokenList: ERC20TOKENSLISTPOLYGON,
+    coinListId: 8,
+    supportedVersions: [0]
   })
 };
 

@@ -8,7 +8,8 @@ export const ALL_SUPPORTED_SDK_VERSIONS = [
   '2.0.0',
   '2.1.0',
   '2.2.0',
-  '2.3.0'
+  '2.3.0',
+  '2.4.0'
 ];
 
 export const LATEST_SUPPORTED_SDK_VERSION =
@@ -32,5 +33,6 @@ export const SDK_TO_PACKET_VERSION: Record<string, PacketVersion | undefined> =
     '2.0.0': PacketVersionMap.v3,
     '2.1.0': PacketVersionMap.v3,
     '2.2.0': PacketVersionMap.v3,
-    '2.3.0': PacketVersionMap.v3
+    '2.3.0': PacketVersionMap.v3,
+    '2.4.0': PacketVersionMap.v3
   };

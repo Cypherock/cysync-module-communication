@@ -1,13 +1,17 @@
 import compareVersions from 'compare-versions';
 export enum FeatureName {
   Default = 0,
-  TokenNameRestructure
+  TokenNameRestructure,
+  GetCoinListFromDevice,
+  EvmLongChainId
 }
 
 // both from and to are inclusive
 const FeatureMap: Record<FeatureName, { from: string; to?: string }> = {
   [FeatureName.Default]: { from: '0.0.0', to: '2.0.0' },
-  [FeatureName.TokenNameRestructure]: { from: '2.1.0' }
+  [FeatureName.TokenNameRestructure]: { from: '2.1.0' },
+  [FeatureName.GetCoinListFromDevice]: { from: '2.3.0' },
+  [FeatureName.EvmLongChainId]: { from: '2.4.0' }
 };
 
 export const isFeatureEnabled = (

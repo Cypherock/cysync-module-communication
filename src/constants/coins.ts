@@ -119,7 +119,6 @@ const ERC20TOKENSLISTPOLYGON: Record<string, Erc20CoinData> = {};
 const TOKENSLISTBSC: Record<string, Erc20CoinData> = {};
 const TOKENSLISTFANTOM: Record<string, Erc20CoinData> = {};
 const TOKENSLISTAVALANCHE: Record<string, Erc20CoinData> = {};
-const TOKENSLISTOPTIMISM: Record<string, Erc20CoinData> = {};
 const TOKENSLISTETC: Record<string, Erc20CoinData> = {};
 const TOKENSLISTHARMONY: Record<string, Erc20CoinData> = {};
 

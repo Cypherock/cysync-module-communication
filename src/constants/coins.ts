@@ -116,6 +116,12 @@ export const SOLANACOINS: Record<string, NearCoinData> = {
 
 const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
 const ERC20TOKENSLISTPOLYGON: Record<string, Erc20CoinData> = {};
+const TOKENSLISTBSC: Record<string, Erc20CoinData> = {};
+const TOKENSLISTFANTOM: Record<string, Erc20CoinData> = {};
+const TOKENSLISTAVALANCHE: Record<string, Erc20CoinData> = {};
+const TOKENSLISTOPTIMISM: Record<string, Erc20CoinData> = {};
+const TOKENSLISTETC: Record<string, Erc20CoinData> = {};
+const TOKENSLISTHARMONY: Record<string, Erc20CoinData> = {};
 
 for (const token of erc20List) {
   if (token.symbol.length <= 16)
@@ -161,6 +167,86 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     chain: 137,
     tokenList: ERC20TOKENSLISTPOLYGON,
     coinListId: 8,
+    supportedVersions: [0]
+  }),
+  bnb: new EthCoinData({
+    abbr: 'bnb',
+    name: 'BNB Smart Chain (BSC)',
+    validatorCoinName: 'bnb',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '8000000A',
+    decimal: 18,
+    fees: 'Gwei',
+    network: 'bsc',
+    coinGeckoId: 'binancecoin',
+    chain: 56,
+    tokenList: TOKENSLISTBSC,
+    coinListId: 0xa,
+    supportedVersions: [0]
+  }),
+  ftm: new EthCoinData({
+    abbr: 'ftm',
+    name: 'Fantom Opera',
+    validatorCoinName: 'ftm',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '8000000B',
+    decimal: 18,
+    fees: 'Gwei',
+    network: 'fantom',
+    coinGeckoId: 'fantom',
+    chain: 250,
+    tokenList: TOKENSLISTFANTOM,
+    coinListId: 0xb,
+    supportedVersions: [0]
+  }),
+  avax: new EthCoinData({
+    abbr: 'avax',
+    name: 'Avalanche Network',
+    validatorCoinName: 'avax',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '8000000C',
+    decimal: 18,
+    fees: 'NanoAvax',
+    network: 'avalanche',
+    coinGeckoId: 'avalanche-2',
+    chain: 43114,
+    tokenList: TOKENSLISTAVALANCHE,
+    coinListId: 0xc,
+    supportedVersions: [0]
+  }),
+  one: new EthCoinData({
+    abbr: 'one',
+    name: 'Harmony',
+    validatorCoinName: 'one',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '8000000E',
+    decimal: 18,
+    fees: 'Gwei',
+    network: 'harmony',
+    coinGeckoId: 'harmony',
+    chain: 1666600000,
+    tokenList: TOKENSLISTHARMONY,
+    coinListId: 0xe,
+    supportedVersions: [0]
+  }),
+  etc: new EthCoinData({
+    abbr: 'etc',
+    name: 'Ethereum Classic',
+    validatorCoinName: 'etc',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '8000000F',
+    decimal: 18,
+    fees: 'Gwei',
+    network: 'etc',
+    coinGeckoId: 'ethereum-classic',
+    chain: 61,
+    tokenList: TOKENSLISTETC,
+    coinListId: 0xf,
     supportedVersions: [0]
   })
 };

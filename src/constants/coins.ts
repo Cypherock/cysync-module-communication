@@ -267,13 +267,22 @@ export const SOLANACOINS: Record<string, NearCoinData> = SolList.reduce(
 );
 
 export const verifyCoinIdUniqueness = () => {
-  // TODO: ensure the IDs are unique
+  const coinIds = new Set<string>();
+  const list = [...BtcList, ...EthList, ...NearList, ...SolList];
+  for (const item of list) {
+    if (coinIds.has(item.id)) {
+      throw new Error('Duplicate coinId entry found: ' + item.id);
+    }
+    coinIds.add(item.id);
+  }
 };
 
 // populate token list for the EVM chains
 Object.keys(ETHCOINS).forEach(
   key => (ETHCOINS[key].tokenList = getErc20Tokens(ETHCOINS[key]))
 );
+
+verifyCoinIdUniqueness();
 
 export const COINS: Record<string, CoinData> = {
   ...BTCCOINS,

@@ -1,13 +1,14 @@
 import { BtcCoinData } from './BtcCoinData';
 import { CoinData } from './CoinData';
-import { Erc20CoinData } from './Erc20CoinData';
-import erc20List from './erc20List.json';
 import { EthCoinData } from './EthCoinData';
 import { NearCoinData } from './NearCoinData';
 import { SolanaCoinData } from './SolanaCoinData';
+import { getErc20Tokens } from './tokens';
 
-export const BTCCOINS: Record<string, BtcCoinData> = {
-  btc: new BtcCoinData({
+const BtcList = [
+  new BtcCoinData({
+    id: 'bitcoin',
+    oldId: 'btc',
     abbr: 'btc',
     name: 'Bitcoin',
     validatorCoinName: 'btc',
@@ -21,7 +22,9 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinListId: 1,
     supportedVersions: [0]
   }),
-  btct: new BtcCoinData({
+  new BtcCoinData({
+    id: 'bitcoin-testnet',
+    oldId: 'btct',
     abbr: 'btct',
     name: 'Bitcoin Testnet',
     validatorCoinName: 'btc',
@@ -35,7 +38,9 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinListId: 2,
     supportedVersions: [0]
   }),
-  ltc: new BtcCoinData({
+  new BtcCoinData({
+    id: 'litecoin',
+    oldId: 'ltc',
     abbr: 'ltc',
     name: 'Litecoin',
     validatorCoinName: 'ltc',
@@ -48,7 +53,9 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinListId: 3,
     supportedVersions: [0]
   }),
-  doge: new BtcCoinData({
+  new BtcCoinData({
+    id: 'dogecoin',
+    oldId: 'doge',
     abbr: 'doge',
     name: 'Dogecoin',
     validatorCoinName: 'doge',
@@ -61,7 +68,9 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinListId: 4,
     supportedVersions: [0]
   }),
-  dash: new BtcCoinData({
+  new BtcCoinData({
+    id: 'dash',
+    oldId: 'dash',
     abbr: 'dash',
     name: 'Dash',
     validatorCoinName: 'dash',
@@ -74,10 +83,12 @@ export const BTCCOINS: Record<string, BtcCoinData> = {
     coinListId: 5,
     supportedVersions: [0]
   })
-};
+];
 
-export const NEARCOINS: Record<string, NearCoinData> = {
-  near: new NearCoinData({
+const NearList = [
+  new NearCoinData({
+    id: 'near',
+    oldId: 'near',
     abbr: 'near',
     name: 'Near',
     curve: 'ed25519',
@@ -93,10 +104,12 @@ export const NEARCOINS: Record<string, NearCoinData> = {
     coinListId: 7,
     supportedVersions: [0]
   })
-};
+];
 
-export const SOLANACOINS: Record<string, NearCoinData> = {
-  sol: new SolanaCoinData({
+const SolList = [
+  new SolanaCoinData({
+    id: 'solana',
+    oldId: 'sol',
     abbr: 'sol',
     name: 'Solana',
     curve: 'ed25519',
@@ -112,31 +125,12 @@ export const SOLANACOINS: Record<string, NearCoinData> = {
     coinListId: 9,
     supportedVersions: [0]
   })
-};
+];
 
-const ERC20TOKENSLIST: Record<string, Erc20CoinData> = {};
-const ERC20TOKENSLISTPOLYGON: Record<string, Erc20CoinData> = {};
-const TOKENSLISTBSC: Record<string, Erc20CoinData> = {};
-const TOKENSLISTFANTOM: Record<string, Erc20CoinData> = {};
-const TOKENSLISTAVALANCHE: Record<string, Erc20CoinData> = {};
-const TOKENSLISTETC: Record<string, Erc20CoinData> = {};
-const TOKENSLISTHARMONY: Record<string, Erc20CoinData> = {};
-
-for (const token of erc20List) {
-  if (token.symbol.length <= 16)
-    ERC20TOKENSLIST[token.symbol.toLowerCase()] = new Erc20CoinData({
-      abbr: token.symbol.toLowerCase(),
-      coinGeckoId: token.id,
-      address: token.address,
-      decimal: token.decimal ?? 18,
-      name: token.name,
-      validatorCoinName: 'eth',
-      validatorNetworkType: 'prod'
-    });
-}
-
-export const ETHCOINS: Record<string, EthCoinData> = {
-  eth: new EthCoinData({
+const EthList = [
+  new EthCoinData({
+    id: 'ethereum',
+    oldId: 'eth',
     abbr: 'eth',
     name: 'Ethereum',
     validatorCoinName: 'eth',
@@ -148,11 +142,12 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     network: 'main',
     coinGeckoId: 'ethereum',
     chain: 1,
-    tokenList: ERC20TOKENSLIST,
     coinListId: 6,
     supportedVersions: [0]
   }),
-  matic: new EthCoinData({
+  new EthCoinData({
+    id: 'polygon',
+    oldId: 'matic',
     abbr: 'matic',
     name: 'Polygon',
     validatorCoinName: 'matic',
@@ -164,11 +159,12 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     network: 'polygon',
     coinGeckoId: 'matic-network',
     chain: 137,
-    tokenList: ERC20TOKENSLISTPOLYGON,
     coinListId: 8,
     supportedVersions: [0]
   }),
-  bnb: new EthCoinData({
+  new EthCoinData({
+    id: 'binance',
+    oldId: 'bnb',
     abbr: 'bnb',
     name: 'BNB Smart Chain (BSC)',
     validatorCoinName: 'bnb',
@@ -180,11 +176,12 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     network: 'bsc',
     coinGeckoId: 'binancecoin',
     chain: 56,
-    tokenList: TOKENSLISTBSC,
     coinListId: 0xa,
     supportedVersions: [0]
   }),
-  ftm: new EthCoinData({
+  new EthCoinData({
+    id: 'fantom',
+    oldId: 'ftm',
     abbr: 'ftm',
     name: 'Fantom Opera',
     validatorCoinName: 'ftm',
@@ -196,11 +193,12 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     network: 'fantom',
     coinGeckoId: 'fantom',
     chain: 250,
-    tokenList: TOKENSLISTFANTOM,
     coinListId: 0xb,
     supportedVersions: [0]
   }),
-  avax: new EthCoinData({
+  new EthCoinData({
+    id: 'avalanche',
+    oldId: 'avax',
     abbr: 'avax',
     name: 'Avalanche Network',
     validatorCoinName: 'avax',
@@ -212,11 +210,12 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     network: 'avalanche',
     coinGeckoId: 'avalanche-2',
     chain: 43114,
-    tokenList: TOKENSLISTAVALANCHE,
     coinListId: 0xc,
     supportedVersions: [0]
   }),
-  one: new EthCoinData({
+  new EthCoinData({
+    id: 'harmony',
+    oldId: 'one',
     abbr: 'one',
     name: 'Harmony',
     validatorCoinName: 'one',
@@ -228,11 +227,12 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     network: 'harmony',
     coinGeckoId: 'harmony',
     chain: 1666600000,
-    tokenList: TOKENSLISTHARMONY,
     coinListId: 0xe,
     supportedVersions: [0]
   }),
-  etc: new EthCoinData({
+  new EthCoinData({
+    id: 'ethereum-c',
+    oldId: 'etc',
     abbr: 'etc',
     name: 'Ethereum Classic',
     validatorCoinName: 'etc',
@@ -244,11 +244,36 @@ export const ETHCOINS: Record<string, EthCoinData> = {
     network: 'etc',
     coinGeckoId: 'ethereum-classic',
     chain: 61,
-    tokenList: TOKENSLISTETC,
     coinListId: 0xf,
     supportedVersions: [0]
   })
+];
+
+export const BTCCOINS: Record<string, BtcCoinData> = BtcList.reduce(
+  (accumulator, element) => ({ ...accumulator, [element.id]: element }),
+  {}
+);
+export const ETHCOINS: Record<string, EthCoinData> = EthList.reduce(
+  (accumulator, element) => ({ ...accumulator, [element.id]: element }),
+  {}
+);
+export const NEARCOINS: Record<string, NearCoinData> = NearList.reduce(
+  (accumulator, element) => ({ ...accumulator, [element.id]: element }),
+  {}
+);
+export const SOLANACOINS: Record<string, NearCoinData> = SolList.reduce(
+  (accumulator, element) => ({ ...accumulator, [element.id]: element }),
+  {}
+);
+
+export const verifyCoinIdUniqueness = () => {
+  // TODO: ensure the IDs are unique
 };
+
+// populate token list for the EVM chains
+Object.keys(ETHCOINS).forEach(
+  key => (ETHCOINS[key].tokenList = getErc20Tokens(ETHCOINS[key]))
+);
 
 export const COINS: Record<string, CoinData> = {
   ...BTCCOINS,

@@ -202,7 +202,7 @@ export const ETHCOINS: Record<string, EthCoinData> = {
   }),
   avax: new EthCoinData({
     abbr: 'avax',
-    name: 'Avalanche Network',
+    name: 'Avalanche (C-Chain)',
     validatorCoinName: 'avax',
     validatorNetworkType: 'prod',
     coinIndex: '8000003c',

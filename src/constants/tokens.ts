@@ -1,6 +1,6 @@
-import { CoinData } from './CoinData';
-import { Erc20CoinData } from './Erc20CoinData';
 import erc20List from './erc20List.json';
+import { CoinData } from './types/CoinData';
+import { Erc20CoinData } from './types/Erc20CoinData';
 
 export const getErc20Tokens = (parent: CoinData) => {
   const TOKENSLIST: Record<string, Erc20CoinData> = {};

@@ -83,7 +83,7 @@ export const EthList = [
     id: EthCoinMap.avalanche,
     oldId: 'avax',
     abbr: 'avax',
-    name: 'Avalanche Network',
+    name: 'Avalanche (C-Chain)',
     validatorCoinName: 'avax',
     validatorNetworkType: 'prod',
     coinIndex: '8000003c',

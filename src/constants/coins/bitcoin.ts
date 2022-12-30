@@ -1,4 +1,8 @@
-import { BitcoinAccountTypes, BtcCoinData } from '../types/BtcCoinData';
+import {
+  BitcoinAccountTypeDetails,
+  BitcoinAccountTypes,
+  BtcCoinData
+} from '../types/BtcCoinData';
 
 export const BtcCoinMap = {
   bitcoin: 'bitcoin',
@@ -25,8 +29,8 @@ export const BtcList = [
     coinListId: 1,
     supportedVersions: [0],
     supportedAccountTypes: [
-      BitcoinAccountTypes.nativeSegwit,
-      BitcoinAccountTypes.legacy
+      BitcoinAccountTypeDetails[BitcoinAccountTypes.nativeSegwit],
+      BitcoinAccountTypeDetails[BitcoinAccountTypes.legacy]
     ]
   }),
   new BtcCoinData({

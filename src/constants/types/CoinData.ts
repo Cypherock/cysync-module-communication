@@ -2,7 +2,7 @@ import { AbsCoinData, IAbsCoinDataOptions } from './AbsCoinData';
 import { Erc20CoinData } from './Erc20CoinData';
 
 export interface ICoinDataOptions extends IAbsCoinDataOptions {
-  supportedAccountTypes?: string[];
+  supportedAccountTypes?: AccountType[];
   customCoinIndex: string;
   coinIndex: string;
   fees: string;
@@ -10,7 +10,7 @@ export interface ICoinDataOptions extends IAbsCoinDataOptions {
 }
 
 export class CoinData extends AbsCoinData {
-  public supportedAccountTypes: string[];
+  public supportedAccountTypes: AccountType[];
   // Custom coin index will be sent to device while adding coins
   public customCoinIndex: string;
   // The actual coin index for caculation purposes

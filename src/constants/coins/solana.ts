@@ -1,4 +1,8 @@
-import { SolanaCoinData } from '../types/SolanaCoinData';
+import {
+  SolanaAccountTypeDetails,
+  SolanaAccountTypes,
+  SolanaCoinData
+} from '../types/SolanaCoinData';
 
 export const SolanaCoinMap = {
   solana: 'solana'
@@ -21,7 +25,12 @@ export const SolanaList = [
     isTest: false,
     network: 'mainnet',
     coinListId: 9,
-    supportedVersions: [0]
+    supportedVersions: [0],
+    supportedAccountTypes: [
+      SolanaAccountTypeDetails[SolanaAccountTypes.solanaBase],
+      SolanaAccountTypeDetails[SolanaAccountTypes.type1],
+      SolanaAccountTypeDetails[SolanaAccountTypes.type2]
+    ]
   })
 ];
 

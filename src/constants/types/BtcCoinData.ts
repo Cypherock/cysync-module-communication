@@ -11,13 +11,13 @@ const BitcoinAccountTypeList: AccountType[] = [
     id: 'native-segwit',
     name: 'Native Segwit',
     tag: 'Native Segwit',
-    identifier: '01'
+    identifier: '0001'
   },
   {
     id: 'legacy',
     name: 'Legacy',
     tag: 'Legacy',
-    identifier: '00'
+    identifier: '0000'
   }
 ];
 

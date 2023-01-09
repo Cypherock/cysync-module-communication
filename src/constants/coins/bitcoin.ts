@@ -1,8 +1,32 @@
-import {
-  BitcoinAccountTypeDetails,
-  BitcoinAccountTypes,
-  BtcCoinData
-} from '../types/BtcCoinData';
+import { AccountType, BtcCoinData } from '../types';
+
+const BitcoinAccountTypeList: AccountType[] = [
+  {
+    id: 'btc-native-segwit',
+    name: 'Native Segwit',
+    tag: 'Native Segwit',
+    identifier: '0001',
+    allowMultiple: true
+  },
+  {
+    id: 'btc-legacy',
+    name: 'Legacy',
+    tag: 'Legacy',
+    identifier: '0000',
+    allowMultiple: true
+  }
+];
+
+export const BitcoinAccountTypes = {
+  nativeSegwit: 'btc-native-segwit',
+  legacy: 'btc-legacy'
+};
+
+export const BitcoinAccountTypeDetails: Record<string, AccountType> =
+  BitcoinAccountTypeList.reduce(
+    (accumulator, element) => ({ ...accumulator, [element.id]: element }),
+    {}
+  );
 
 export const BtcCoinMap = {
   bitcoin: 'bitcoin',

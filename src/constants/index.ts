@@ -1,10 +1,12 @@
 import {
+  BitcoinAccountTypeDetails,
   BTCCOINS,
   BtcList,
   ETHCOINS,
   EthList,
   NEARCOINS,
   NearList,
+  SolanaAccountTypeDetails,
   SOLANACOINS,
   SolanaList
 } from './coins';
@@ -37,4 +39,9 @@ export const COINS: Record<string, CoinData> = {
   ...ETHCOINS,
   ...NEARCOINS,
   ...SOLANACOINS
+};
+
+export const AccountTypeDetails = {
+  ...BitcoinAccountTypeDetails,
+  ...SolanaAccountTypeDetails
 };

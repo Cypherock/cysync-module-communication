@@ -1,8 +1,40 @@
-import {
-  SolanaAccountTypeDetails,
-  SolanaAccountTypes,
-  SolanaCoinData
-} from '../types/SolanaCoinData';
+import { AccountType, SolanaCoinData } from '../types';
+
+const SolanaAccountTypeList: AccountType[] = [
+  {
+    id: 'solana-2-depth',
+    name: 'Paper',
+    tag: 'Paper',
+    identifier: '0001',
+    allowMultiple: false
+  },
+  {
+    id: 'solana-3-depth',
+    name: 'Ledger',
+    tag: 'Ledger',
+    identifier: '0002',
+    allowMultiple: true
+  },
+  {
+    id: 'solana-4-depth',
+    name: 'Phantom',
+    tag: 'Phantom',
+    identifier: '0003',
+    allowMultiple: true
+  }
+];
+
+export const SolanaAccountTypes = {
+  base: 'solana-2-depth',
+  ledger: 'solana-3-depth',
+  phantom: 'solana-4-depth'
+};
+
+export const SolanaAccountTypeDetails: Record<string, AccountType> =
+  SolanaAccountTypeList.reduce(
+    (accumulator, element) => ({ ...accumulator, [element.id]: element }),
+    {}
+  );
 
 export const SolanaCoinMap = {
   solana: 'solana'
@@ -27,9 +59,9 @@ export const SolanaList = [
     coinListId: 9,
     supportedVersions: [0],
     supportedAccountTypes: [
-      SolanaAccountTypeDetails[SolanaAccountTypes.solanaBase],
-      SolanaAccountTypeDetails[SolanaAccountTypes.type1],
-      SolanaAccountTypeDetails[SolanaAccountTypes.type2]
+      SolanaAccountTypeDetails[SolanaAccountTypes.base],
+      SolanaAccountTypeDetails[SolanaAccountTypes.ledger],
+      SolanaAccountTypeDetails[SolanaAccountTypes.phantom]
     ]
   })
 ];

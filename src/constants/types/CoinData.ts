@@ -34,4 +34,5 @@ export interface AccountType {
   name: string;
   tag: string;
   identifier: string;
+  allowMultiple: boolean;
 }

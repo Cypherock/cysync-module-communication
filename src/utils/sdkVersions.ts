@@ -3,7 +3,7 @@ import { compare } from 'compare-versions';
 import { PacketVersion, PacketVersionMap } from './versions';
 
 // Supported version from order older to newer
-export const ALL_SUPPORTED_SDK_VERSIONS = ['2.4.0'];
+export const ALL_SUPPORTED_SDK_VERSIONS = ['2.5.0'];
 
 export const LATEST_SUPPORTED_SDK_VERSION =
   ALL_SUPPORTED_SDK_VERSIONS[ALL_SUPPORTED_SDK_VERSIONS.length - 1];
@@ -27,5 +27,6 @@ export const SDK_TO_PACKET_VERSION: Record<string, PacketVersion | undefined> =
     '2.1.0': PacketVersionMap.v3,
     '2.2.0': PacketVersionMap.v3,
     '2.3.0': PacketVersionMap.v3,
-    '2.4.0': PacketVersionMap.v3
+    '2.4.0': PacketVersionMap.v3,
+    '2.5.0': PacketVersionMap.v3
   };

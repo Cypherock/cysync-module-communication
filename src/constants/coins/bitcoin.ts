@@ -30,7 +30,6 @@ export const BitcoinAccountTypeDetails: Record<string, AccountType> =
 
 export const BtcCoinMap = {
   bitcoin: 'bitcoin',
-  bitcoinTestnet: 'bitcoin-testnet',
   dash: 'dash',
   dogecoin: 'dogecoin',
   litecoin: 'litecoin'
@@ -56,22 +55,6 @@ export const BtcList = [
       BitcoinAccountTypeDetails[BitcoinAccountTypes.nativeSegwit],
       BitcoinAccountTypeDetails[BitcoinAccountTypes.legacy]
     ]
-  }),
-  new BtcCoinData({
-    id: BtcCoinMap.bitcoinTestnet,
-    oldId: 'btct',
-    abbr: 'btct',
-    name: 'Bitcoin Testnet',
-    validatorCoinName: 'btc',
-    validatorNetworkType: 'testnet',
-    coinIndex: '80000001',
-    customCoinIndex: '80000001',
-    decimal: 8,
-    fees: 'sat/byte',
-    hasSegwit: true,
-    isTest: true,
-    coinListId: 2,
-    supportedVersions: [0]
   }),
   new BtcCoinData({
     id: BtcCoinMap.litecoin,

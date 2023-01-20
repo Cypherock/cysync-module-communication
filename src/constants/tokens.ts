@@ -19,6 +19,7 @@ export const getErc20Tokens = (parent: CoinData) => {
       const id = `${parent.id}:${token.id}`;
       TOKENSLIST[id] = new Erc20CoinData({
         id,
+        parentId: parent.id,
         oldId: token.symbol.toLowerCase(),
         abbr: token.symbol.toLowerCase(),
         coinGeckoId: token.id,

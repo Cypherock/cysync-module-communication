@@ -1,6 +1,7 @@
 export interface IAbsCoinDataOptions {
   // Required details
   id: string; // Unique identifier for coins; TODO: add check for uniqueness
+  parentId?: string; // Parent identifier used for tokens
   oldId: string; // Old identifier for coins; (oldId <=> abbr <=> slug)
   abbr: string;
   name: string;
@@ -27,6 +28,7 @@ export interface IAbsCoinDataOptions {
 export abstract class AbsCoinData {
   // Required details
   public id: string;
+  public parentId?: string;
   public oldId: string;
   public abbr: string;
   public validatorCoinName: string;
@@ -49,6 +51,7 @@ export abstract class AbsCoinData {
 
   constructor({
     id,
+    parentId,
     oldId,
     abbr,
     validatorCoinName,
@@ -63,6 +66,7 @@ export abstract class AbsCoinData {
     supportedVersions
   }: IAbsCoinDataOptions) {
     this.id = id;
+    this.parentId = parentId;
     this.oldId = oldId;
     this.abbr = abbr;
     this.validatorCoinName = validatorCoinName;

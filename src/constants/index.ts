@@ -11,6 +11,7 @@ import {
   SolanaList
 } from './coins';
 import { getErc20Tokens } from './tokens';
+import { AbsCoinData } from './types';
 import { CoinData } from './types/CoinData';
 
 export * from './coins';
@@ -40,6 +41,15 @@ export const COINS: Record<string, CoinData> = {
   ...NEARCOINS,
   ...SOLANACOINS
 };
+
+const generateTokenList = () => {
+  let tokenList: Record<string, AbsCoinData> = {};
+  Object.keys(COINS).forEach(
+    key => (tokenList = { ...tokenList, ...COINS[key].tokenList })
+  );
+  return tokenList;
+};
+export const TOKENS: Record<string, AbsCoinData> = generateTokenList();
 
 export const AccountTypeDetails = {
   ...BitcoinAccountTypeDetails,

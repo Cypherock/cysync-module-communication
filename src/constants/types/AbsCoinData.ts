@@ -1,7 +1,7 @@
 export interface IAbsCoinDataOptions {
   // Required details
   id: string; // Unique identifier for coins; TODO: add check for uniqueness
-  oldId: string; // Old identifier for coins; (oldId <=> abbr <=> slug)
+  oldId?: string; // Old identifier for coins; (oldId <=> abbr <=> slug)
   abbr: string;
   name: string;
 
@@ -27,7 +27,7 @@ export interface IAbsCoinDataOptions {
 export abstract class AbsCoinData {
   // Required details
   public id: string;
-  public oldId: string;
+  public oldId?: string;
   public abbr: string;
   public validatorCoinName: string;
   public validatorNetworkType: string;
@@ -63,7 +63,7 @@ export abstract class AbsCoinData {
     supportedVersions
   }: IAbsCoinDataOptions) {
     this.id = id;
-    this.oldId = oldId;
+    this.oldId = oldId ?? '';
     this.abbr = abbr;
     this.validatorCoinName = validatorCoinName;
     this.validatorNetworkType = validatorNetworkType;

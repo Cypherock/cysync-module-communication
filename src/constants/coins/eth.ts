@@ -100,7 +100,6 @@ export const EthList = [
   }),
   new EthCoinData({
     id: EthCoinMap.optimism,
-    oldId: 'op',
     abbr: 'eth',
     name: 'Optimism',
     validatorCoinName: 'eth',
@@ -151,7 +150,6 @@ export const EthList = [
   }),
   new EthCoinData({
     id: EthCoinMap.arbitrum,
-    oldId: 'eth',
     abbr: 'eth',
     name: 'Arbitrum One',
     validatorCoinName: 'eth',

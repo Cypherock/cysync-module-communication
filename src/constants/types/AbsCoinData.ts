@@ -67,7 +67,7 @@ export abstract class AbsCoinData {
   }: IAbsCoinDataOptions) {
     this.id = id;
     this.parentId = parentId;
-    this.oldId = oldId ?? '';
+    this.oldId = oldId;
     this.abbr = abbr;
     this.validatorCoinName = validatorCoinName;
     this.validatorNetworkType = validatorNetworkType;

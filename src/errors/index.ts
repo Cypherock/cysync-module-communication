@@ -22,6 +22,7 @@ export enum DeviceErrorType {
   FLASH_CRC_MISMATCH = 'HD_FIRM_1009',
   FLASH_TIMEOUT_ERROR = 'HD_FIRM_1010',
   FLASH_NACK = 'HD_FIRM_1011',
+  FEATURE_NOT_SUPPORTED = 'HD_FIRM_1012',
 
   NO_WORKING_PACKET_VERSION = 'HD_INIT_2006',
   UNKNOWN_COMMUNICATION_ERROR = 'HD_COM_5500',
@@ -113,6 +114,10 @@ const errorObjects: CodeToErrorMap = {
   [DeviceErrorType.FLASH_NACK]: {
     message: 'Flash Negative Acknowledgement',
     doRetry: true
+  },
+  [DeviceErrorType.FEATURE_NOT_SUPPORTED]: {
+    message: 'Feature Not Supported\nUpdate your device',
+    doRetry: false
   },
 
   [DeviceErrorType.NO_WORKING_PACKET_VERSION]: {

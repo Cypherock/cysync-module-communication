@@ -7,7 +7,9 @@ export const EthCoinMap = {
   fantom: 'fantom',
   avalanche: 'avalanche',
   harmony: 'harmony',
-  'ethereum-c': 'ethereum-c'
+  'ethereum-c': 'ethereum-c',
+  arbitrum: 'arbitrum',
+  optimism: 'optimism'
 } as const;
 
 export const EthList = [
@@ -97,6 +99,22 @@ export const EthList = [
     supportedVersions: [0]
   }),
   new EthCoinData({
+    id: EthCoinMap.optimism,
+    abbr: 'eth',
+    name: 'Optimism',
+    validatorCoinName: 'eth',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '8000000D',
+    decimal: 18,
+    fees: 'Gwei',
+    network: 'optimism',
+    coinGeckoId: 'ethereum',
+    chain: 10,
+    coinListId: 0x0d,
+    supportedVersions: [0]
+  }),
+  new EthCoinData({
     id: EthCoinMap.harmony,
     oldId: 'one',
     abbr: 'one',
@@ -128,6 +146,22 @@ export const EthList = [
     coinGeckoId: 'ethereum-classic',
     chain: 61,
     coinListId: 0xf,
+    supportedVersions: [0]
+  }),
+  new EthCoinData({
+    id: EthCoinMap.arbitrum,
+    abbr: 'eth',
+    name: 'Arbitrum One',
+    validatorCoinName: 'eth',
+    validatorNetworkType: 'prod',
+    coinIndex: '8000003c',
+    customCoinIndex: '80000010',
+    decimal: 18,
+    fees: 'Gwei',
+    network: 'arbitrum',
+    coinGeckoId: 'ethereum',
+    chain: 42161,
+    coinListId: 0x10,
     supportedVersions: [0]
   })
 ];

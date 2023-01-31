@@ -2,7 +2,7 @@ export interface IAbsCoinDataOptions {
   // Required details
   id: string; // Unique identifier for coins; TODO: add check for uniqueness
   parentId?: string; // Parent identifier used for tokens
-  oldId: string; // Old identifier for coins; (oldId <=> abbr <=> slug)
+  oldId?: string; // Old identifier for coins; (oldId <=> abbr <=> slug)
   abbr: string;
   name: string;
 
@@ -29,7 +29,7 @@ export abstract class AbsCoinData {
   // Required details
   public id: string;
   public parentId?: string;
-  public oldId: string;
+  public oldId?: string;
   public abbr: string;
   public validatorCoinName: string;
   public validatorNetworkType: string;

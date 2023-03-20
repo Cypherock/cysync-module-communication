@@ -12,7 +12,7 @@ export const getErc20Tokens = (parent: CoinData) => {
     if (token.symbol.length <= 16 && token.platforms[parent.id]) {
       if (
         !token.platforms[parent.id].contract_address ||
-        token.platforms[parent.id].decimal_place === undefined
+        [null, undefined].includes(token.platforms[parent.id].decimal_place)
       ) {
         logger.error({ token, parent });
         throw new Error('Missing token data');

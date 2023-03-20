@@ -1,4 +1,6 @@
 export enum DeviceErrorType {
+  SWAP_TXN_UNKNOWN_ERROR = 'TODO_1234', // TODO: add error code
+
   NOT_CONNECTED = 'HD_INIT_1001',
 
   DEVICE_DISCONNECTED_IN_FLOW = 'HD_INIT_1010',
@@ -141,7 +143,11 @@ const errorObjects: CodeToErrorMap = {
     doRetry: false
   },
   [DeviceErrorType.PROCESS_ABORTED_BY_USER]: {
-    message: 'Abort process dont care',
+    message: 'Abort process don\'t care',
+    doRetry: false
+  },
+  [DeviceErrorType.SWAP_TXN_UNKNOWN_ERROR]: {
+    message: 'Unknown error while performing swapping transaction',
     doRetry: false
   }
 };

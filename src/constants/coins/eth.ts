@@ -6,8 +6,8 @@ export const EthCoinMap = {
   binance: 'binance',
   fantom: 'fantom',
   avalanche: 'avalanche',
-  harmony: 'harmony',
-  'ethereum-c': 'ethereum-c',
+  harmony: 'harmony', // deprecated
+  'ethereum-c': 'ethereum-c', // deprecated
   arbitrum: 'arbitrum',
   optimism: 'optimism'
 } as const;
@@ -112,40 +112,6 @@ export const EthList = [
     coinGeckoId: 'ethereum',
     chain: 10,
     coinListId: 0x0d,
-    supportedVersions: [0]
-  }),
-  new EthCoinData({
-    id: EthCoinMap.harmony,
-    oldId: 'one',
-    abbr: 'one',
-    name: 'Harmony',
-    validatorCoinName: 'one',
-    validatorNetworkType: 'prod',
-    coinIndex: '8000003c',
-    customCoinIndex: '8000000E',
-    decimal: 18,
-    fees: 'Gwei',
-    network: 'harmony',
-    coinGeckoId: 'harmony',
-    chain: 1666600000,
-    coinListId: 0xe,
-    supportedVersions: [0]
-  }),
-  new EthCoinData({
-    id: EthCoinMap['ethereum-c'],
-    oldId: 'etc',
-    abbr: 'etc',
-    name: 'Ethereum Classic',
-    validatorCoinName: 'etc',
-    validatorNetworkType: 'prod',
-    coinIndex: '8000003c',
-    customCoinIndex: '8000000F',
-    decimal: 18,
-    fees: 'Gwei',
-    network: 'etc',
-    coinGeckoId: 'ethereum-classic',
-    chain: 61,
-    coinListId: 0xf,
     supportedVersions: [0]
   }),
   new EthCoinData({

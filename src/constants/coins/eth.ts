@@ -134,7 +134,7 @@ export const EthList = [
 
 export type EthIds = typeof EthCoinMap[keyof typeof EthCoinMap] | string;
 
-export const ETHCOINS: Record<EthIds, EthCoinData> = EthList.reduce(
+export const ETHCOINS: Record<EthIds, EthCoinData | undefined> = EthList.reduce(
   (accumulator, element) => ({ ...accumulator, [element.id]: element }),
   {} as any
 );

@@ -29,13 +29,14 @@ export const verifyCoinIdUniqueness = () => {
 };
 
 // populate token list for the EVM chains
-Object.keys(ETHCOINS).forEach(
-  key => (ETHCOINS[key].tokenList = getErc20Tokens(ETHCOINS[key]))
-);
+Object.keys(ETHCOINS).forEach(key => {
+  const ethCoin = ETHCOINS[key];
+  if (ethCoin) ethCoin.tokenList = getErc20Tokens(ethCoin);
+});
 
 verifyCoinIdUniqueness();
 
-export const COINS: Record<string, CoinData> = {
+export const COINS: Record<string, CoinData | undefined> = {
   ...BTCCOINS,
   ...ETHCOINS,
   ...NEARCOINS,
@@ -45,7 +46,7 @@ export const COINS: Record<string, CoinData> = {
 const generateTokenList = () => {
   let tokenList: Record<string, AbsCoinData> = {};
   Object.keys(COINS).forEach(
-    key => (tokenList = { ...tokenList, ...COINS[key].tokenList })
+    key => (tokenList = { ...tokenList, ...COINS[key]?.tokenList })
   );
   return tokenList;
 };
